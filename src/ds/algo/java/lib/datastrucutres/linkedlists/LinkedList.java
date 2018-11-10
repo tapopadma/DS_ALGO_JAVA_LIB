@@ -31,9 +31,14 @@ public class LinkedList {
 	}
 	
 	public void print() {
-		for(Node ptr = head;ptr != null;ptr=ptr.next) {
-			System.out.println(ptr.key);
+		if(hasLoop()) {
+			System.out.println("Loop detected");
+			return;
 		}
+		for(Node ptr = head;ptr != null;ptr=ptr.next) {
+			System.out.print(ptr.key+"->");
+		}
+		System.out.println("");
 	}
 	
 	//O(N)
@@ -47,24 +52,30 @@ public class LinkedList {
 			}
 			ptr.next = new Node(value);
 		}
+		++length;
 	}
 	
 	//O(1)	
 	public void pushFront(int value) {
 		Node oldHead = head;
 		head = new Node(value, oldHead);
+		++length;
 	}
 	
-	//O(N)
-	public int get(int index) {
+	public Node getNodeAt(int index) {
 		if(index >= length)
-			return -1;
+			return null;
 		int idx = 0;
 		Node ptr = head;
 		while(idx < index) {
 			idx++; ptr = ptr.next;
 		}
-		return ptr.key;
+		return ptr;
+	}
+	
+	//O(N)
+	public int get(int index) {
+		return getNodeAt(index).key;
 	}
 	
 	//O(N)
@@ -80,6 +91,7 @@ public class LinkedList {
 		}
 		Node oldNext = ptr.next;
 		ptr.next = new Node(value, oldNext);
+		++length;
 	}
 	
 	//O(N)
@@ -98,6 +110,7 @@ public class LinkedList {
 			}
 			ptr.next = ptr.next.next;
 		}
+		--length;
 	}
 	
 	//O(N)
@@ -112,10 +125,96 @@ public class LinkedList {
 	
 	//O(N)
 	public boolean hasLoop() {
-		if(length == 0) {
+		return getLoopLength() > 0; 
+	}
+	
+	public int getLoopLength() {
+		Node slow = head;
+		Node fast = head;
+		while(true) {
+			if(fast == null || fast.next == null) {
+				return 0;
+			}
+			slow = slow.next;
+			fast = fast.next.next;
+			if(slow == fast) {
+				break;
+			}
+		}
+		int len = 1;
+		Node ptr = slow;
+		while(ptr.next != slow) {
+			ptr = ptr.next;++len;
+		}
+		return len;
+	}
+	
+	public int getLoopStartIndex() {
+		return length - getLoopLength();
+	}
+	
+	public void joinTailAt(int index) {
+		Node tail = getNodeAt(length - 1);
+		tail.next = getNodeAt(index);
+	}
+	
+	Node reverse(Node node) {
+		if(node == null) {
+			return null;
+		}
+		Node nextNode = reverse(node.next);
+		if(nextNode != null) {
+			nextNode.next = node;
+		} else {
+			head = node;
+		}
+		node.next = null;
+		return node;
+	}
+	
+	public LinkedList reverse() {
+		reverse(head);
+		return this;
+	}
+	
+	public LinkedList subList(int fromIndex, int toIndex) {
+		LinkedList L = new LinkedList();
+		int index = 0;
+		for(Node ptr = head;ptr != null;ptr=ptr.next,++index) {
+			if(index >= fromIndex && index <= toIndex) {
+				L.pushBack(ptr.key);
+			}
+		}
+		return L;
+	}
+	
+	public boolean equals(LinkedList L) {
+		if(this.size() != L.size()) {
 			return false;
 		}
+		for(Node ptr=head, ptr1=L.getNodeAt(0);ptr != null;ptr=ptr.next,ptr1=ptr1.next) {
+			if(ptr.key != ptr1.key) {
+				return false;
+			}
+		}
 		return true;
+	}
+	
+	public boolean isPalindrome() {
+		LinkedList firstHalf = this.subList(0, size()/2 - 1);
+		LinkedList secondHalf = this.subList((this.size()+1)/2, length - 1).reverse();
+		return firstHalf.equals(secondHalf);
+	}
+	
+	public void clear() {
+		head = null;length = 0;
+	}
+	
+	public void swap(int index1, int index2) {
+		if(index1 > index2) {
+			int temp = index1;index1 = index2;index2 = temp;
+		}
+		//if()
 	}
 	
 }
