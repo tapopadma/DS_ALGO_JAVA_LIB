@@ -34,6 +34,14 @@ public class LinkedListTest {
 		L.print();
 		L.joinTailAt(1);
 		System.out.println(L.getLoopStartIndex() + " " + L.getLoopLength());
+		L.clear();
+		L.pushBack(1);L.swap(0, 0);L.print();
+		L.pushBack(2);L.swap(1, 0);L.print();
+		L.pushBack(3);L.swap(0, 2);L.swap(0, 1);L.swap(1, 2);L.print();
+		L.reverse().print();
+		L.sort();L.print();
+		L.clear();L.pushBack(5);L.sort();L.print();
+		L.pushBack(2);L.sort();L.print();
 	}
 
 }

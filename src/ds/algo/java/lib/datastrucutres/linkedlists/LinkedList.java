@@ -210,11 +210,124 @@ public class LinkedList {
 		head = null;length = 0;
 	}
 	
+	void swap(Node node1, Node node2) {
+		if(node1 == node2) {
+			return;
+		}
+		Node prev1 = getPreviousNode(node1);
+		Node prev2 = getPreviousNode(node2);
+		Node cur1 = head;
+		if(prev1 != null) {
+			cur1 = prev1.next;
+		}
+		Node cur2 = prev2.next;
+		Node next1 = cur1.next;
+		Node next2 = cur2.next;
+		if(prev1 != null) {
+			prev1.next = cur2;
+		} else {
+			head = cur2;
+		}
+		if(cur2 != next1) {
+			cur2.next = next1;
+		} else {
+			cur2.next = cur1;
+		}
+		if(prev2 != cur1) {
+			prev2.next = cur1;
+		} else {
+			prev2.next = next1;
+		}
+		cur1.next = next2;
+	}
+	
 	public void swap(int index1, int index2) {
+		if(index1 == index2) {
+			return;
+		}
 		if(index1 > index2) {
 			int temp = index1;index1 = index2;index2 = temp;
 		}
-		//if()
+		if(index1 >= length && index2 >= length) {
+			return;
+		}
+		Node prev1 = null;
+		if(index1 > 0) {
+			prev1 = getNodeAt(index1 - 1);
+		}
+		Node prev2 = getNodeAt(index2 - 1);
+		Node cur1 = head;
+		if(prev1 != null) {
+			cur1 = prev1.next;
+		}
+		Node cur2 = prev2.next;
+		Node next1 = cur1.next;
+		Node next2 = cur2.next;
+		if(prev1 != null) {
+			prev1.next = cur2;
+		} else {
+			head = cur2;
+		}
+		if(cur2 != next1) {
+			cur2.next = next1;
+		} else {
+			cur2.next = cur1;
+		}
+		if(prev2 != cur1) {
+			prev2.next = cur1;	
+		} else {
+			prev2.next = next1;
+		}
+		cur1.next = next2;
+	}
+	
+	Node getPreviousNode(Node node) {
+		for(Node ptr=head;ptr!=null;ptr=ptr.next) {
+			if(ptr.next == node) {
+				return ptr;
+			}
+		}
+		return null;
+	}
+	
+	Node partition(Node start, Node end) {
+		int pivot = end.key;
+		Node i = null;
+		for(Node j=start;j!=end;j=j.next) {
+			if(j.key <= pivot) {
+				if(i == null) {
+					i = start;
+				} else {
+					i = i.next;
+				}
+				swap(i, j);
+			}
+		}
+		Node ptr = start;
+		if(i != null) {
+			ptr = i.next;
+		}
+		swap(ptr, end);
+		return end;
+	}
+	
+	void quickSort(Node start, Node end) {
+		Node pivot = partition(start, end);
+		if(pivot != head) {
+			quickSort(start, getPreviousNode(pivot));
+		}
+		if(pivot != end) {
+			quickSort(pivot.next, end);
+		}
+	}
+	
+	//Quick sort
+	public LinkedList sort() {
+		if(length == 0) {
+			return this;
+		}
+		quickSort(head, getNodeAt(length - 1));
+		return this;
 	}
 	
 }
