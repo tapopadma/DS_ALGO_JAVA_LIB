@@ -7,9 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 
@@ -19,15 +16,48 @@ public class Main {
 		
 		int NN = 1000006;
 		int MOD = 1000000007;
+		long [] exp2 = new long[NN];
+		long [] fac = new long[NN];
 		
-		Map<Long, Long> freq;
-		long [] a;
+		long expo(long x, long n) {
+			long ret = 1;
+			long sq = x;
+			while(n > 0) {
+				if((n&1L)!=0) {
+					ret = (ret * sq) % MOD;
+				}
+				sq = (sq * sq) % MOD;
+				n >>= 1L;
+			}
+			return ret;
+		}
+		
+		long ncr(long n, long r) {
+			long ret = fac[(int) n];
+			ret = (ret * expo(fac[(int) (n - r)], MOD - 2L))%MOD;
+			ret = (ret * expo(fac[(int) (r)], MOD - 2L))%MOD;
+			return ret;
+		}
 		
 		public void solve(InputReader in, PrintWriter out) {
+			fac[0] = 1L;
+			exp2[0] = 1L;
+			for(int i=1;i<NN;++i) {
+				fac[i] = (fac[i - 1] * i * 1L)%MOD;
+				exp2[i] = (exp2[i - 1] * 2L)%MOD;
+			}
 			int t = in.nextInt();
 			for(int testcaseNo = 1;testcaseNo <= t;++testcaseNo) {
-				int n = in.nextInt();
-				int p = in.nextInt();
+				long n = in.nextLong(), m =in.nextLong();
+				long ans = fac[(int) (2L*n)];
+				long factor = -1;
+				for(long r = 1;r<=m;++r) {
+					factor *= -1;
+					long val = factor * ncr(m, r);
+					val = (val * exp2[(int) r])%MOD;
+					val = (val * fac[(int) (2L*n-r)])%MOD;
+					ans = (ans - val + MOD) % MOD;
+				}
 				out.println("Case #" + testcaseNo + ": " + ans);
 			}
 		}
@@ -49,8 +79,8 @@ public class Main {
 			e.printStackTrace();
 		}
         Task solver = new Task();
-        solver.solve(in, out);
-        //solver.solve(fin, fout);
+        //solver.solve(in, out);
+        solver.solve(fin, fout);
         out.close();
        fout.close();
 	}
