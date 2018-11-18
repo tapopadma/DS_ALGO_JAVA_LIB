@@ -23,35 +23,12 @@ public class Main {
 		Map<Long, Long> freq;
 		long [] a;
 		
-		public void solve(InputReader in, PrintWriter out,
-				FileInputReader fin, PrintWriter fout) {
-			int t = fin.nextInt();
+		public void solve(InputReader in, PrintWriter out) {
+			int t = in.nextInt();
 			for(int testcaseNo = 1;testcaseNo <= t;++testcaseNo) {
-				int n = fin.nextInt();
-				a = new long[n];
-				for(int i=0;i<n;++i) {
-					a[i] = fin.nextLong();
-				}
-				Arrays.sort(a);
-				long ans = 0;
-				freq = new HashMap<>();
-				for(int y = n-1;y>0;--y) {
-					for(int x=0;x<y;++x) {
-						long cnt = 0;
-						long prod = a[x] * a[y];
-						if(freq.containsKey(prod)) {
-							cnt = freq.get(prod);
-						}
-						ans += cnt;
-					}
-					long cnt = 0;
-					if(freq.containsKey(a[y])) {
-						cnt = freq.get(a[y]);
-					}
-					++cnt;
-					freq.put(a[y], cnt);
-				}
-				fout.println("Case #" + testcaseNo + ": " + ans);
+				int n = in.nextInt();
+				int p = in.nextInt();
+				out.println("Case #" + testcaseNo + ": " + ans);
 			}
 		}
 	}
@@ -63,7 +40,7 @@ public class Main {
         PrintWriter out = new PrintWriter(outputStream);
         String IPfilePath = "/home/tapopadma/Downloads/ip.in";
         String OPfilePath = "/home/tapopadma/Downloads/op.out";
-        FileInputReader fin = new FileInputReader(IPfilePath);
+        InputReader fin = new InputReader(IPfilePath);
         PrintWriter fout = null;
         try {
 			fout = new PrintWriter(new File(OPfilePath));
@@ -72,7 +49,8 @@ public class Main {
 			e.printStackTrace();
 		}
         Task solver = new Task();
-        solver.solve(in, out, fin, fout);
+        solver.solve(in, out);
+        //solver.solve(fin, fout);
         out.close();
        fout.close();
 	}
@@ -85,33 +63,8 @@ public class Main {
             reader = new BufferedReader(new InputStreamReader(stream), 32768);
             tokenizer = null;
         }
-
-        public String next() {
-            while (tokenizer == null || !tokenizer.hasMoreTokens()) {
-                try {
-                    tokenizer = new StringTokenizer(reader.readLine());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return tokenizer.nextToken();
-        }
-
-        public int nextInt() {
-            return Integer.parseInt(next());
-        }
-
-        public long nextLong() {
-            return Long.parseLong(next());
-        }
-
-    }
-	
-	static class FileInputReader {
-        public BufferedReader reader;
-        public StringTokenizer tokenizer;
-
-        public FileInputReader(String filePath) {
+        
+        public InputReader(String filePath) {
         	File file = new File(filePath);
             try {
 				reader = new BufferedReader(new FileReader(file));
