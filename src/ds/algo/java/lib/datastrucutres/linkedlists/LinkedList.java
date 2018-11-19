@@ -210,9 +210,9 @@ public class LinkedList {
 		head = null;length = 0;
 	}
 	
-	void swap(Node node1, Node node2) {
+	Node[] swap(Node node1, Node node2) {
 		if(node1 == node2) {
-			return;
+			return new Node[] { node2, node1 };
 		}
 		Node prev1 = getPreviousNode(node1);
 		Node prev2 = getPreviousNode(node2);
@@ -239,6 +239,7 @@ public class LinkedList {
 			prev2.next = next1;
 		}
 		cur1.next = next2;
+		return new Node[] { node2, node1 };
 	}
 	
 	public void swap(int index1, int index2) {
@@ -290,30 +291,39 @@ public class LinkedList {
 		return null;
 	}
 	
-	Node partition(Node start, Node end) {
-		int pivot = end.key;
+	Node[] partition(Node start, Node end) {
+		Node pivot = end;
 		Node i = null;
 		for(Node j=start;j!=end;j=j.next) {
-			if(j.key <= pivot) {
+			if(j.key <= pivot.key) {
 				if(i == null) {
 					i = start;
+					start = j;
 				} else {
 					i = i.next;
 				}
-				swap(i, j);
+				Node[] ij = swap(i, j);
+				i = ij[0];j = ij[1];
 			}
 		}
 		Node ptr = start;
 		if(i != null) {
 			ptr = i.next;
 		}
-		swap(ptr, end);
-		return end;
+		Node[] pe = swap(ptr, end);
+		pivot = pe[0];end = pe[1];
+		if(i == null) {
+			start = pe[0];
+		}
+		return new Node[] {pivot, start, end};
 	}
 	
 	void quickSort(Node start, Node end) {
-		Node pivot = partition(start, end);
-		if(pivot != head) {
+		Node[] result = partition(start, end);
+		Node pivot = result[0];
+		start = result[1];
+		end = result[2];
+		if(pivot != start) {
 			quickSort(start, getPreviousNode(pivot));
 		}
 		if(pivot != end) {
