@@ -330,4 +330,15 @@ public class LinkedList {
 		return this;
 	}
 	
+	public boolean isSorted() {
+		int prevVal = -1000000000;
+		for(Node ptr = head;ptr != null;ptr=ptr.next) {
+			if(ptr.key < prevVal) {
+				return false;
+			}
+			prevVal = ptr.key;
+		}
+		return true;
+	}
+	
 }
