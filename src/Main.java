@@ -64,10 +64,17 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		InputStream inputStream = System.in;
+        Task solver = new Task();
+        
+        // Standard IO
+        InputStream inputStream = System.in;
         OutputStream outputStream = System.out;
         InputReader in = new InputReader(inputStream);
         PrintWriter out = new PrintWriter(outputStream);
+        solver.solve(in, out);
+        out.close();
+        
+        /*// File IO
         String IPfilePath = "/home/tapopadma/Downloads/ip.in";
         String OPfilePath = "/home/tapopadma/Downloads/op.out";
         InputReader fin = new InputReader(IPfilePath);
@@ -78,11 +85,8 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        Task solver = new Task();
-        //solver.solve(in, out);
         solver.solve(fin, fout);
-        out.close();
-       fout.close();
+        fout.close();*/
 	}
 	
 	static class InputReader {
