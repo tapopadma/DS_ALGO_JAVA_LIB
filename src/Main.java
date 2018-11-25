@@ -20,56 +20,39 @@ public class Main {
 		int MOD = 1000000007;
 		
 		public void solve(InputReader in, PrintWriter out) {
-			int n = in.nextInt(), m = in.nextInt();
-			long [] a = new long[n];
-			long sum = 0;
-			for(int i=0;i<n;++i) {
-				a[i] = in.nextLong();
-				sum += a[i];
+			
+		}
+	}
+	
+	static void prepareIO(boolean isFileIO) {
+		Task solver = new Task();
+		// Standard IO
+		if(!isFileIO) {
+			InputStream inputStream = System.in;
+	        OutputStream outputStream = System.out;
+	        InputReader in = new InputReader(inputStream);
+	        PrintWriter out = new PrintWriter(outputStream);
+	        solver.solve(in, out);
+	        out.close();
+		}
+        // File IO
+		else {
+			String IPfilePath = System.getProperty("user.home") + "/Downloads/ip.in";
+	        String OPfilePath = System.getProperty("user.home") + "/Downloads/op.out";
+	        InputReader fin = new InputReader(IPfilePath);
+	        PrintWriter fout = null;
+	        try {
+				fout = new PrintWriter(new File(OPfilePath));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
 			}
-			long used = 0;
-			Arrays.sort(a);
-			long h = a[n - 1];
-			for(int i=n-1;i>=0;--i) {
-				if(i == 0) {
-					used += Math.max(1, h);
-				} else {
-					if(h > a[i - 1]) {
-						used += (h - a[i - 1]);
-						h = a[i - 1];
-					} else {
-						++used;
-						--h;
-					}
-				}
-			}
-			out.println(sum - used);
+	        solver.solve(fin, fout);
+	        fout.close();
 		}
 	}
 	
 	public static void main(String[] args) {
-        Task solver = new Task();
-        
-        // Standard IO
-        InputStream inputStream = System.in;
-        OutputStream outputStream = System.out;
-        InputReader in = new InputReader(inputStream);
-        PrintWriter out = new PrintWriter(outputStream);
-        solver.solve(in, out);
-        out.close();
-        
-        /*// File IO
-        String IPfilePath = System.getProperty("user.home") + "/Downloads/ip.in";
-        String OPfilePath = System.getProperty("user.home") + "/Downloads/op.out";
-        InputReader fin = new InputReader(IPfilePath);
-        PrintWriter fout = null;
-        try {
-			fout = new PrintWriter(new File(OPfilePath));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-        solver.solve(fin, fout);
-        fout.close();*/
+        prepareIO(false);
 	}
 	
 	static class InputReader {
