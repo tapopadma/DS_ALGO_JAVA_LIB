@@ -3,17 +3,17 @@ package ds.algo.java.lib.datastrucutres.linkedlists;
 public class LinkedList {
 
 	class Node {
-		int key;
+		int data;
 		Node next;
 		public Node() {
 
 		}
-		public Node(int key) {
-			this.key = key;
+		public Node(int data) {
+			this.data = data;
 			this.next = null;
 		}
-		public Node(int key, Node next) {
-			this.key = key;
+		public Node(int data, Node next) {
+			this.data = data;
 			this.next = next;
 		}
 	}
@@ -36,7 +36,7 @@ public class LinkedList {
 			return;
 		}
 		for(Node ptr = head;ptr != null;ptr=ptr.next) {
-			System.out.print(ptr.key+"->");
+			System.out.print(ptr.data+"->");
 		}
 		System.out.println("");
 	}
@@ -75,7 +75,7 @@ public class LinkedList {
 	
 	//O(N)
 	public int get(int index) {
-		return getNodeAt(index).key;
+		return getNodeAt(index).data;
 	}
 	
 	//O(N)
@@ -116,7 +116,7 @@ public class LinkedList {
 	//O(N)
 	public boolean contains(int value) {
 		for(Node ptr=head;ptr!=null;ptr=ptr.next) {
-			if(ptr.key == value) {
+			if(ptr.data == value) {
 				return true;
 			}
 		}
@@ -182,7 +182,7 @@ public class LinkedList {
 		int index = 0;
 		for(Node ptr = head;ptr != null;ptr=ptr.next,++index) {
 			if(index >= fromIndex && index <= toIndex) {
-				L.pushBack(ptr.key);
+				L.pushBack(ptr.data);
 			}
 		}
 		return L;
@@ -193,7 +193,7 @@ public class LinkedList {
 			return false;
 		}
 		for(Node ptr=head, ptr1=L.getNodeAt(0);ptr != null;ptr=ptr.next,ptr1=ptr1.next) {
-			if(ptr.key != ptr1.key) {
+			if(ptr.data != ptr1.data) {
 				return false;
 			}
 		}
@@ -295,7 +295,7 @@ public class LinkedList {
 		Node pivot = end;
 		Node i = null;
 		for(Node j=start;j!=end;j=j.next) {
-			if(j.key <= pivot.key) {
+			if(j.data <= pivot.data) {
 				if(i == null) {
 					i = start;
 					start = j;
@@ -343,10 +343,10 @@ public class LinkedList {
 	public boolean isSorted() {
 		int prevVal = -1000000000;
 		for(Node ptr = head;ptr != null;ptr=ptr.next) {
-			if(ptr.key < prevVal) {
+			if(ptr.data < prevVal) {
 				return false;
 			}
-			prevVal = ptr.key;
+			prevVal = ptr.data;
 		}
 		return true;
 	}
