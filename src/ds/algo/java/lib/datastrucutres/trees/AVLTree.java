@@ -18,7 +18,6 @@ public class AVLTree{
 	Node root;
 	public void add(long value) {
 		root = insert(root, value);
-		balance();
 	}
 	
 	Node insert(Node node, long value) {
@@ -36,6 +35,7 @@ public class AVLTree{
 			node.right = insert(node.right, value);
 		}
 		node = updateHeight(node);
+		node = balance(node);
 		return node;
 	}
 	
@@ -56,7 +56,6 @@ public class AVLTree{
 	
 	public void remove(long value) {
 		root = delete(root, value);
-		balance();
 	}
 	
 	Node delete(Node node, long value) {
@@ -75,41 +74,21 @@ public class AVLTree{
 				if(node.right == null) {
 					return node.left;
 				}
-				if(node.left.right == null) {
-					node.left.right = node.right;
-					node.left = updateHeight(node.left);
-					return node.left;
+				Node ptr = node.left;
+				while(ptr.right != null) {
+					ptr = ptr.right;
 				}
-				Node ptr1 = node.left;
-				Node ptr2 = ptr1;
-				while(ptr2.right != null) {
-					ptr1 = ptr2;
-					ptr2 = ptr2.right;
-				}
-				ptr1.right = null;
-				ptr2.left = node.left;
-				ptr2.right = node.right;
-				ptr2.left = updateHeightToRightRecursive(ptr2.left);
-				ptr2 = updateHeight(ptr2);
-				return ptr2;
+				node.data = ptr.data;
+				node.left = delete(node.left, ptr.data);
 			}
-			return node;
 		}
-		if(node.data > value) {
+		else if(node.data > value) {
 			node.left = delete(node.left, value);
 		} else {
 			node.right = delete(node.right, value);
 		}
 		node = updateHeight(node);
-		return node;
-	}
-	
-	Node updateHeightToRightRecursive(Node node) {
-		if(node == null) {
-			return null;
-		}
-		node.right = updateHeightToRightRecursive(node.right);
-		node = updateHeight(node);
+		node = balance(node);
 		return node;
 	}
 	
@@ -125,57 +104,71 @@ public class AVLTree{
 		return ptr.data;
 	}
 	
-	void balance() {
-		if(root == null) {
-			return;
+	int getLeftHeight(Node node) {
+		if(node == null) {
+			return 0;
 		}
-		int lh = (root.left == null ? 0 : root.left.height);
-		int rh = (root.right == null ? 0 : root.right.height);
+		return (node.left == null ? 0 : node.left.height + 1);
+	}
+	
+	int getRightHeight(Node node) {
+		if(node == null) {
+			return 0;
+		}
+		return (node.right == null ? 0 : node.right.height + 1);
+	}
+	
+	Node balance(Node node) {
+		if(node == null) {
+			return null;
+		}
+		int lh = getLeftHeight(node);
+		int rh = getRightHeight(node);
 		if(Math.abs(lh-rh) < 2) {
-			return;
+			return node;
 		}
 		if(lh > rh) {
-			Node lroot = root.left;
-			int llh = (lroot.left == null ? 0 : lroot.left.height);
-			int lrh = (lroot.right == null ? 0 : lroot.right.height);
+			Node lnode = node.left;
+			int llh = getLeftHeight(lnode);
+			int lrh = getRightHeight(lnode);
 			if(llh > lrh) {//LL
-				root.left = lroot.right;
-				lroot.right = root;
-				root = lroot;
-				root.right = updateHeight(root.right);
-				root = updateHeight(root);
-				
+				node.left = lnode.right;
+				lnode.right = node;
+				node = lnode;
+				node.right = updateHeight(node.right);
+				node = updateHeight(node);
 			} else {//LR
-				Node lrroot = lroot.right;
-				lroot.right = lrroot.left;
-				lrroot.left = lroot;
-				root.left = lrroot;
-				root.left.left = updateHeight(root.left.left);
-				root.left = updateHeight(root.left);
-				root = updateHeight(root);
-				balance();	
+				Node lrnode = lnode.right;
+				lnode.right = lrnode.left;
+				lrnode.left = lnode;
+				node.left = lrnode;
+				node.left.left = updateHeight(node.left.left);
+				node.left = updateHeight(node.left);
+				node = updateHeight(node);
+				node = balance(node);	
 			}
 		} else {
-			Node rroot = root.right;
-			int rlh = (rroot.left == null ? 0 : rroot.left.height);
-			int rrh = (rroot.right == null ? 0 : rroot.right.height);
+			Node rnode = node.right;
+			int rlh = getLeftHeight(rnode);
+			int rrh = getRightHeight(rnode);
 			if(rrh > rlh) {//RR
-				root.right = rroot.left;
-				rroot.left = root;
-				root = rroot;
-				root.left = updateHeight(root.left);
-				root = updateHeight(root);
+				node.right = rnode.left;
+				rnode.left = node;
+				node = rnode;
+				node.left = updateHeight(node.left);
+				node = updateHeight(node);
 			} else {
-				Node rlroot = rroot.left;
-				rroot.left = rlroot.right;
-				rlroot.right = rroot;
-				root.right = rlroot;
-				root.right.right = updateHeight(root.right.right);
-				root.right = updateHeight(root.right);
-				root = updateHeight(root);
-				balance();
+				Node rlnode = rnode.left;
+				rnode.left = rlnode.right;
+				rlnode.right = rnode;
+				node.right = rlnode;
+				node.right.right = updateHeight(node.right.right);
+				node.right = updateHeight(node.right);
+				node = updateHeight(node);
+				node = balance(node);
 			}
 		}
+		return node;
 	}
 	
 	public void print() {
