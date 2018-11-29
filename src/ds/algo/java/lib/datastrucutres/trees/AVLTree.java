@@ -1,5 +1,11 @@
 package ds.algo.java.lib.datastrucutres.trees;
 
+/**
+ * A balanced BST with O(logN) insert/delete functionality
+ * Reference:  https://drive.google.com/open?id=1FKUtQgNVlPyC3tut4YSbkCC65F2qk-mk
+ * @author tapopadma
+ *
+ */
 public class AVLTree{
 	class Node {
 		long data;

@@ -7,15 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.TreeSet;
+
 
 public class Main {
 
@@ -62,32 +55,14 @@ public class Main {
 			for(int i=1;i<=x;++i) {
 				dp[i][0] = -INF;
 			}
-			Map<Long, Integer> mp;
-			Heap st;
 			for(int i=1;i<=x;++i) {
-				mp = new TreeMap<>();
-				st = new Heap();
+				AVLTree st = new AVLTree();
 				for(int j=1;j<=n;++j) {
 					long value = dp[i - 1][j - 1] + a[j - 1];
-					int cnt = 0;
-					if(mp.containsKey(value)) {
-						cnt = mp.get(value);
-					}
-					++cnt;
-					mp.put(value, cnt);
-					if(cnt == 1) {
-						st.add(value);
-					}
+					st.add(value);
 					if(j - 1 - K >= 0) {
 						value = dp[i - 1][j - 1 - K] + a[j - 1 - K];
-						cnt = 0;
-						if(mp.containsKey(value)) {
-							cnt = mp.get(value);
-						}
-						--cnt;
-						if(cnt <= 0) {
-							st.remove(value);
-						}
+						st.remove(value);
 					}
 					dp[i][j] = st.getMax();
 				}
@@ -99,70 +74,200 @@ public class Main {
 			out.println(ans);
 		}
 		
-		class Heap{
-			Map<Long, Integer> freq = new HashMap<>();
-			long [] T = new long[5555];
-			int tot = 0;
-			
-			public void add(long value) {
-				if(freq.containsKey(value)) {
-					int cnt = freq.get(value);
-					++cnt;
-					freq.put(value, cnt);
-					return;
+		public class AVLTree{
+			class Node {
+				long data;
+				int freq;
+				int height;
+				Node left;
+				Node right;
+				public Node(long data) {
+					this.data = data;
+					this.freq = 1;
+					this.height = 0;
+					this.left = null;
+					this.right = null;
 				}
-				freq.put(value, 1);
-				T[++tot] = value;
-				int idx = tot;
-				while(idx/2 >= 1 && T[idx/2] < T[idx]) {
-					long temp = T[idx/2];
-					T[idx/2] = T[idx];
-					T[idx] = temp;
-					idx/=2;
-				}			
+			}
+			Node root;
+			public void add(long value) {
+				root = insert(root, value);
+			}
+			
+			Node insert(Node node, long value) {
+				if(node == null) {
+					node = new Node(value);
+					return node;
+				}
+				if(node.data == value) {
+					++node.freq;
+					return node;
+				}
+				if(node.data > value) {
+					node.left = insert(node.left, value);
+				} else {
+					node.right = insert(node.right, value);
+				}
+				node = updateHeight(node);
+				node = balance(node);
+				return node;
+			}
+			
+			Node updateHeight(Node node) {
+				if(node == null) {
+					return null;
+				}
+				int height = 0;
+				if(node.left != null) {
+					height = Math.max(height, node.left.height + 1);
+				}
+				if(node.right != null) {
+					height = Math.max(height, node.right.height + 1);
+				}
+				node.height = height;
+				return node;
 			}
 			
 			public void remove(long value) {
-				if(freq.containsKey(value)) {
-					int cnt = freq.get(value);
-					--cnt;
-					if(cnt == 0) {
-						freq.remove(value);
-					}else {
-						freq.put(value, cnt);	
+				root = delete(root, value);
+			}
+			
+			Node delete(Node node, long value) {
+				if(node == null) {
+					return null;
+				}
+				if(node.data == value) {
+					--node.freq;
+					if(node.freq == 0) {
+						if(node.left == null && node.right == null) {
+							return null;
+						}
+						if(node.left == null) {
+							return node.right;
+						}
+						if(node.right == null) {
+							return node.left;
+						}
+						Node ptr = node.left;
+						while(ptr.right != null) {
+							ptr = ptr.right;
+						}
+						node.data = ptr.data;
+						node.left = delete(node.left, ptr.data);
 					}
 				}
+				else if(node.data > value) {
+					node.left = delete(node.left, value);
+				} else {
+					node.right = delete(node.right, value);
+				}
+				node = updateHeight(node);
+				node = balance(node);
+				return node;
+			}
+			
+			boolean isLeaf(Node node) {
+				return node != null && node.left == null && node.right == null;
 			}
 			
 			public long getMax() {
-				while(!freq.containsKey(T[1])) {
-					removeMax();
+				Node ptr = root;
+				while(ptr.right != null) {
+					ptr = ptr.right;
 				}
-				return T[1];
+				return ptr.data;
 			}
 			
-			void removeMax() {
-				T[1] = T[tot--];
-				int idx = 1;
-				while(true) {
-					if(idx*2 > tot) {
-						break;						
+			int getLeftHeight(Node node) {
+				if(node == null) {
+					return 0;
+				}
+				return (node.left == null ? 0 : node.left.height + 1);
+			}
+			
+			int getRightHeight(Node node) {
+				if(node == null) {
+					return 0;
+				}
+				return (node.right == null ? 0 : node.right.height + 1);
+			}
+			
+			Node balance(Node node) {
+				if(node == null) {
+					return null;
+				}
+				int lh = getLeftHeight(node);
+				int rh = getRightHeight(node);
+				if(Math.abs(lh-rh) < 2) {
+					return node;
+				}
+				if(lh > rh) {
+					Node lnode = node.left;
+					int llh = getLeftHeight(lnode);
+					int lrh = getRightHeight(lnode);
+					if(llh > lrh) {//LL
+						node.left = lnode.right;
+						lnode.right = node;
+						node = lnode;
+						node.right = updateHeight(node.right);
+						node = updateHeight(node);
+					} else {//LR
+						Node lrnode = lnode.right;
+						lnode.right = lrnode.left;
+						lrnode.left = lnode;
+						node.left = lrnode;
+						node.left.left = updateHeight(node.left.left);
+						node.left = updateHeight(node.left);
+						node = updateHeight(node);
+						node = balance(node);	
 					}
-					if(Math.max(T[idx*2], (idx*2+1) <= tot ? T[idx*2+1]: -INF-100) < T[idx]) {
-						break;
-					}
-					if(idx*2 + 1 <= tot && T[idx*2+1] > T[idx*2]) {
-						long temp = T[idx];T[idx] = T[idx*2+1];T[idx*2+1]=temp;
-						idx = idx * 2 + 1;
-					}
-					else {
-						long temp = T[idx];T[idx] = T[idx*2];T[idx*2]=temp;
-						idx = idx * 2;
+				} else {
+					Node rnode = node.right;
+					int rlh = getLeftHeight(rnode);
+					int rrh = getRightHeight(rnode);
+					if(rrh > rlh) {//RR
+						node.right = rnode.left;
+						rnode.left = node;
+						node = rnode;
+						node.left = updateHeight(node.left);
+						node = updateHeight(node);
+					} else {
+						Node rlnode = rnode.left;
+						rnode.left = rlnode.right;
+						rlnode.right = rnode;
+						node.right = rlnode;
+						node.right.right = updateHeight(node.right.right);
+						node.right = updateHeight(node.right);
+						node = updateHeight(node);
+						node = balance(node);
 					}
 				}
+				return node;
+			}
+			
+			public void print() {
+				inorder(root);System.out.println("");
+			}
+			
+			public void inorder(Node node) {
+				if(node == null) {
+					return;
+				}
+				inorder(node.left);
+				System.out.print("("+node.data+"[" + node.freq+"])");
+				inorder(node.right);
+			}
+			
+			public void clear() {
+				 this.root = null;
+			}
+			
+			public int getDepth() {
+				return root == null ? 0 : root.height;
 			}
 			
 		}
+
 		
 	}
 	
