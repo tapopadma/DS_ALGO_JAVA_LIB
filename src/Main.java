@@ -16,7 +16,7 @@ public class Main {
 		
 		int NN = 100005;
 		int MOD = 1000000007;
-		long INF = 1000000000000000000L;
+		long INF = 10000000000000000L;
 		long [] a;
 		long [][] dp;
 		
@@ -32,10 +32,13 @@ public class Main {
 			if(n == 0) {
 				return -INF;
 			}
+			if(dp[x][n] != -1) {
+				return dp[x][n];
+			}
 			for(int i=0;i<k && i < n;++i) {
 				ret = Math.max(ret, rec(x - 1, n - i - 1, k) + a[n - i - 1]);
 			}
-			return ret;
+			return dp[x][n] = ret;
 		}
 		
 		public void solve(InputReader in, PrintWriter out) {
@@ -56,22 +59,16 @@ public class Main {
 				dp[i][0] = -INF;
 			}
 			for(int i=1;i<=x;++i) {
-				AVLTree st = new AVLTree();
+				AVLTree tree = new AVLTree();
 				for(int j=1;j<=n;++j) {
-					long value = dp[i - 1][j - 1] + a[j - 1];
-					st.add(value);
-					if(j - 1 - K >= 0) {
-						value = dp[i - 1][j - 1 - K] + a[j - 1 - K];
-						st.remove(value);
+					tree.add(dp[i - 1][j - 1] + a[j - 1]);
+					if(j-1-K >= 0) {
+						tree.remove(dp[i - 1][j - 1 - K] + a[j - 1 - K]);
 					}
-					dp[i][j] = st.getMax();
+					dp[i][j] = tree.getMax();
 				}
 			}
-			long ans = dp[x][n];
-			if(ans < 0) {
-				ans = -1;
-			}
-			out.println(ans);
+			out.println(dp[x][n] < 0 ? -1 : dp[x][n]);
 		}
 		
 		public class AVLTree{
@@ -137,8 +134,7 @@ public class Main {
 					return null;
 				}
 				if(node.data == value) {
-					--node.freq;
-					if(node.freq == 0) {
+					if(node.freq == 1) {
 						if(node.left == null && node.right == null) {
 							return null;
 						}
@@ -154,6 +150,8 @@ public class Main {
 						}
 						node.data = ptr.data;
 						node.left = delete(node.left, ptr.data);
+					} else {
+						node.freq = node.freq - 1;
 					}
 				}
 				else if(node.data > value) {
@@ -254,7 +252,9 @@ public class Main {
 					return;
 				}
 				inorder(node.left);
-				System.out.print("("+node.data+"[" + node.freq+"])");
+				if(node.data >= 0) {
+					System.out.print("("+node.data+"[" + node.freq+"])");
+				}
 				inorder(node.right);
 			}
 			

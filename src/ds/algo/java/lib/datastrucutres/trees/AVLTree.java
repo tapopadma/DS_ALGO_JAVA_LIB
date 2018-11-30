@@ -69,8 +69,7 @@ public class AVLTree{
 			return null;
 		}
 		if(node.data == value) {
-			--node.freq;
-			if(node.freq == 0) {
+			if(node.freq == 1) {
 				if(node.left == null && node.right == null) {
 					return null;
 				}
@@ -86,6 +85,8 @@ public class AVLTree{
 				}
 				node.data = ptr.data;
 				node.left = delete(node.left, ptr.data);
+			} else {
+				node.freq = node.freq - 1;
 			}
 		}
 		else if(node.data > value) {
