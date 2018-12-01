@@ -30,6 +30,7 @@ import ds.algo.java.lib.io.FastInputReader;
  * definition of magic index). In this way we process all
  * queries without processing a magic index more than once
  * on the linkedlist and hence O(N).
+ * Ref: https://codeforces.com/contest/1077/problem/F2
  * @author tapopadma
  *
  */
