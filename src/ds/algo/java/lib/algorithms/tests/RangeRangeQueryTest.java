@@ -30,7 +30,7 @@ public class RangeRangeQueryTest {
 	4
 	2*/
 	public static void main(String[] args) {
-		StandardSolverExector.solve(new RangeRangeQuery(), true);
+		StandardSolverExector.execute(new RangeRangeQuery(), true);
 	}
 
 }

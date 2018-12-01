@@ -11,7 +11,7 @@ import ds.algo.java.lib.io.FastInputReader;
 
 public final class StandardSolverExector {
 
-	public static void solve(StandardAlgoSolver solver, boolean fileMode) {
+	public static void execute(StandardAlgoSolver solver, boolean fileMode) {
 		// Standard IO
 		if(!fileMode) {
 			InputStream inputStream = System.in;
