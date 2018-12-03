@@ -3,14 +3,14 @@ package ds.algo.java.lib.datastrucutres.linkedlists.tests;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import ds.algo.java.lib.datastrucutres.linkedlists.LinkedList;
+import ds.algo.java.lib.datastrucutres.linkedlists.SinglyLinkedList;
 
 public class LinkedListLargeDataTest {
 
 	static int NN = 10000;
 	
 	public static void main(String[] args) {
-		LinkedList L = new LinkedList();
+		SinglyLinkedList L = new SinglyLinkedList();
 		Random rand = ThreadLocalRandom.current();
 		int [] a = new int[NN];
 		for(int i=0;i<NN;++i) {

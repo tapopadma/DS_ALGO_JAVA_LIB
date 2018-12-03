@@ -1,11 +1,11 @@
 package ds.algo.java.lib.datastrucutres.linkedlists.tests;
 
-import ds.algo.java.lib.datastrucutres.linkedlists.LinkedList;
+import ds.algo.java.lib.datastrucutres.linkedlists.SinglyLinkedList;
 
 public class LinkedListTest {
 
 	public static void main(String[] args) {
-		LinkedList L = new LinkedList();
+		SinglyLinkedList L = new SinglyLinkedList();
 		L.pushBack(2);
 		L.pushFront(1);
 		L.pushFront(0);

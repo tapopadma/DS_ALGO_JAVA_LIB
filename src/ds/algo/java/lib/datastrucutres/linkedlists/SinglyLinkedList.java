@@ -1,36 +1,12 @@
 package ds.algo.java.lib.datastrucutres.linkedlists;
 
-public class LinkedList {
+public class SinglyLinkedList extends UniDirectionalLinkedList{
 
-	class Node {
-		int data;
-		Node next;
-		public Node() {
-
-		}
-		public Node(int data) {
-			this.data = data;
-			this.next = null;
-		}
-		public Node(int data, Node next) {
-			this.data = data;
-			this.next = next;
-		}
+	public SinglyLinkedList() {
+		super();
 	}
 
-	Node head;
-	int length;
-	
-	public LinkedList() {
-		head = null;
-		length = 0;
-	}
-
-	public int size() {
-		return length;
-	}
-	
-	public void print() {
+	public void print()  {
 		if(hasLoop()) {
 			System.out.println("Loop detected");
 			return;
@@ -40,9 +16,8 @@ public class LinkedList {
 		}
 		System.out.println("");
 	}
-	
-	//O(N)
-	public void pushBack(int value) {
+
+	public void pushBack(int value)  {
 		if(head == null) {
 			head = new Node(value);
 		} else {
@@ -54,14 +29,14 @@ public class LinkedList {
 		}
 		++length;
 	}
-	
-	//O(1)	
+
 	public void pushFront(int value) {
 		Node oldHead = head;
 		head = new Node(value, oldHead);
 		++length;
 	}
-	
+
+	@Override
 	public Node getNodeAt(int index) {
 		if(index >= length)
 			return null;
@@ -72,13 +47,8 @@ public class LinkedList {
 		}
 		return ptr;
 	}
-	
-	//O(N)
-	public int get(int index) {
-		return getNodeAt(index).data;
-	}
-	
-	//O(N)
+
+	@Override
 	public void insertAt(int index, int value) {
 		if(index >= length) {
 			return;
@@ -93,9 +63,9 @@ public class LinkedList {
 		ptr.next = new Node(value, oldNext);
 		++length;
 	}
-	
-	//O(N)
-	public void deleteAt(int index) {
+
+	@Override
+	public void deleteAt(int index)  {
 		if(index >= length){
 			return;
 		}
@@ -112,9 +82,9 @@ public class LinkedList {
 		}
 		--length;
 	}
-	
-	//O(N)
-	public boolean contains(int value) {
+
+	@Override
+	public boolean contains(int value)  {
 		for(Node ptr=head;ptr!=null;ptr=ptr.next) {
 			if(ptr.data == value) {
 				return true;
@@ -123,7 +93,6 @@ public class LinkedList {
 		return false;
 	}
 	
-	//O(N)
 	public boolean hasLoop() {
 		return getLoopLength() > 0; 
 	}
@@ -172,13 +141,13 @@ public class LinkedList {
 		return node;
 	}
 	
-	public LinkedList reverse() {
+	public SinglyLinkedList reverse() {
 		reverse(head);
 		return this;
 	}
 	
-	public LinkedList subList(int fromIndex, int toIndex) {
-		LinkedList L = new LinkedList();
+	public SinglyLinkedList subList(int fromIndex, int toIndex) {
+		SinglyLinkedList L = new SinglyLinkedList();
 		int index = 0;
 		for(Node ptr = head;ptr != null;ptr=ptr.next,++index) {
 			if(index >= fromIndex && index <= toIndex) {
@@ -188,7 +157,7 @@ public class LinkedList {
 		return L;
 	}
 	
-	public boolean equals(LinkedList L) {
+	public boolean equals(SinglyLinkedList L) {
 		if(this.size() != L.size()) {
 			return false;
 		}
@@ -201,15 +170,11 @@ public class LinkedList {
 	}
 	
 	public boolean isPalindrome() {
-		LinkedList firstHalf = this.subList(0, size()/2 - 1);
-		LinkedList secondHalf = this.subList((this.size()+1)/2, length - 1).reverse();
+		SinglyLinkedList firstHalf = this.subList(0, size()/2 - 1);
+		SinglyLinkedList secondHalf = this.subList((this.size()+1)/2, length - 1).reverse();
 		return firstHalf.equals(secondHalf);
 	}
-	
-	public void clear() {
-		head = null;length = 0;
-	}
-	
+
 	Node[] swap(Node node1, Node node2) {
 		if(node1 == node2) {
 			return new Node[] { node2, node1 };
@@ -332,7 +297,7 @@ public class LinkedList {
 	}
 	
 	//Quick sort
-	public LinkedList sort() {
+	public SinglyLinkedList sort() {
 		if(length == 0) {
 			return this;
 		}
