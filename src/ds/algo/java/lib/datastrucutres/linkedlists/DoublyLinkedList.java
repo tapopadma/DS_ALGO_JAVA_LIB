@@ -1,7 +1,5 @@
 package ds.algo.java.lib.datastrucutres.linkedlists;
 
-import ds.algo.java.lib.datastrucutres.linkedlists.LinkedList.Node;
-
 public class DoublyLinkedList {
 
 	class Node{
@@ -45,6 +43,59 @@ public class DoublyLinkedList {
 		++length;
 	}
 	
+	public void addLast(int data) {
+		Node tail = getNodeAt(length - 1);
+		Node node = new Node(data, tail, null);
+		tail.next = node;
+		tail = node;
+		++length;
+	}
+	
+	public void addFirst(int data) {
+		Node node = new Node(data, null, head);
+		head.prev = node;
+		head = node;
+		++length;
+	}
+
+	public void removeLast() {
+		Node tail = getNodeAt(length - 1);
+		--length;
+		if(head == tail) {
+			head = null;
+			return;
+		}
+		tail = tail.prev;
+		tail.next = null;
+	}
+	
+	public void removeFirst() {
+		--length;
+		if(head.next == null) {
+			head = null;return;
+		}
+		head.next.prev = null;
+		head = head.next;
+	}
+	
+	public void removeAt(int index) {
+		if(index == 0) {
+			removeFirst();return;
+		}
+		if(index == length - 1) {
+			removeLast();return;
+		}
+		Node node = getNodeAt(index);
+		if(node == null) {
+			return;
+		}
+		node.prev.next = node.next;
+		if(node.next != null) {
+			node.next.prev = node.prev;
+		}
+		--length;
+	}
+	
 	public int get(int index) {
 		return getNodeAt(index).data;
 	}
@@ -58,6 +109,26 @@ public class DoublyLinkedList {
 			idx++; ptr = ptr.next;
 		}
 		return ptr;
+	}
+	
+	Node reverse(Node node) {
+		if(node == null) {
+			return null;
+		}
+		Node nextNode = reverse(node.next);
+		if(nextNode == null) {
+			head = node;
+			return node;
+		}
+		nextNode.next = node;
+		node.prev = nextNode;
+		node.next = null;
+		return node;
+	}
+	
+	public DoublyLinkedList reverse() {
+		reverse(head);
+		return this;
 	}
 	
 	public void print() {

@@ -12,6 +12,14 @@ public class DoublyLinkedListTest {
 		L.insert(2, 5);
 		L.insert(2, 4);
 		L.print();
+		L.reverse().print();
+		L.addFirst(6);
+		L.addLast(0);
+		L.reverse().print();
+		L.removeFirst();L.print();
+		L.removeAt(4);L.print();
+		L.removeLast();L.print();
+		L.reverse().print();
 	}
 
 }
