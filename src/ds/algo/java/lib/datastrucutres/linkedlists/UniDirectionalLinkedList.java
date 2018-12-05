@@ -26,6 +26,11 @@ public abstract class UniDirectionalLinkedList {
 		length = 0;
 	}
 	
+	public UniDirectionalLinkedList(Node head, int length) {
+		this.head = head;
+		this.length = length;
+	}
+	
 	public int size() {
 		return length;
 	}

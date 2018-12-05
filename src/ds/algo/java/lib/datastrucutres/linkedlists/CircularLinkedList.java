@@ -6,6 +6,10 @@ public class CircularLinkedList extends UniDirectionalLinkedList{
 		super();
 	}
 	
+	public CircularLinkedList(Node head, int length) {
+		super(head, length);
+	}
+	
 	@Override
 	public void print() {
 		if(size() == 0) {
@@ -75,5 +79,36 @@ public class CircularLinkedList extends UniDirectionalLinkedList{
 		}
 		return false;
 	}	
+	
+	public CircularLinkedList [] splitToHalves() {
+		if(size()%2 != 0 || head == null) {
+			return null;
+		}
+		Node slow = head;
+		Node fast = head;
+		while(true) {
+			slow = slow.next;
+			fast = fast.next.next;
+			if(fast == head) {
+				break;
+			}
+		}
+		Node head1 = head;
+		Node tail1 = head;
+		while(tail1.next != slow) {
+			tail1 = tail1.next;
+		}
+		Node head2 = slow;
+		Node tail2 = slow;
+		while(slow.next != head) {
+			slow = slow.next;
+		}
+		tail1.next = head1;
+		tail2.next = head2;
+		return new CircularLinkedList [] {
+				new CircularLinkedList(head1, size()/2),
+				new CircularLinkedList(head2, length/2)
+		};
+	}
 	
 }

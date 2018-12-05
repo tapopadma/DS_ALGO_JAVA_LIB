@@ -44,11 +44,29 @@ public class DoublyLinkedList {
 	}
 	
 	public void addLast(int data) {
+		if(size() == 0) {
+			head = new Node(data);
+			++length;
+			return;
+		}
 		Node tail = getNodeAt(length - 1);
 		Node node = new Node(data, tail, null);
 		tail.next = node;
 		tail = node;
 		++length;
+	}
+	
+	public void addAll(DoublyLinkedList L) {
+		if(size() == 0) {
+			this.head = L.getNodeAt(0);
+			this.length = L.size();
+			return;
+		}
+		Node tail = getNodeAt(size() - 1);
+		if(L.size() > 0) {
+			tail.next = L.getNodeAt(0);
+		}
+		this.length += L.size();
 	}
 	
 	public void addFirst(int data) {
@@ -136,6 +154,10 @@ public class DoublyLinkedList {
 			System.out.print(ptr.data+"<->");
 		}
 		System.out.println("");
+	}
+	
+	public int size() {
+		return length;
 	}
 	
 }
