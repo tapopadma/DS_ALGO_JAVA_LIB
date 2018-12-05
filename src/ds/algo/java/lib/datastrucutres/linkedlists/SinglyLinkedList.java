@@ -127,6 +127,18 @@ public class SinglyLinkedList extends UniDirectionalLinkedList{
 		tail.next = getNodeAt(index);
 	}
 	
+	public SinglyLinkedList addAll(SinglyLinkedList L) {
+		if(L.size() == 0) {
+			return this;
+		}
+		Node ptr = L.getNodeAt(0);
+		while(ptr != null) {
+			this.pushBack(ptr.data);
+			ptr = ptr.next;
+		}
+		return this;
+	}
+	
 	Node reverse(Node node) {
 		if(node == null) {
 			return null;
@@ -161,7 +173,8 @@ public class SinglyLinkedList extends UniDirectionalLinkedList{
 		if(this.size() != L.size()) {
 			return false;
 		}
-		for(Node ptr=head, ptr1=L.getNodeAt(0);ptr != null;ptr=ptr.next,ptr1=ptr1.next) {
+		for(Node ptr=head, ptr1=L.getNodeAt(0);ptr != null;
+				ptr=ptr.next,ptr1=ptr1.next) {
 			if(ptr.data != ptr1.data) {
 				return false;
 			}
@@ -171,7 +184,8 @@ public class SinglyLinkedList extends UniDirectionalLinkedList{
 	
 	public boolean isPalindrome() {
 		SinglyLinkedList firstHalf = this.subList(0, size()/2 - 1);
-		SinglyLinkedList secondHalf = this.subList((this.size()+1)/2, length - 1).reverse();
+		SinglyLinkedList secondHalf = this.subList(
+				(this.size()+1)/2, length - 1).reverse();
 		return firstHalf.equals(secondHalf);
 	}
 
@@ -314,6 +328,57 @@ public class SinglyLinkedList extends UniDirectionalLinkedList{
 			prevVal = ptr.data;
 		}
 		return true;
+	}
+	
+	public SinglyLinkedList reverse(int fromIndex, int toIndex) {
+		int len = this.length;
+		return this.subList(0, fromIndex - 1).addAll(
+				this.subList(fromIndex, toIndex).reverse())
+				.addAll(this.subList(toIndex + 1, len - 1));
+	}
+	
+	SinglyLinkedList mergeSort(SinglyLinkedList L) {
+		if(L.size() < 2) {
+			return L;
+		}
+		return merge(mergeSort(L.subList(0, L.size()/2 - 1)),
+				mergeSort(L.subList(L.size()/2, L.size()-1)));
+	}
+	
+	SinglyLinkedList merge(SinglyLinkedList L1, SinglyLinkedList L2) {
+		L1.print();L2.print();
+		SinglyLinkedList L = new SinglyLinkedList();
+		Node start1 = L1.getNodeAt(0), start2 = L2.getNodeAt(0);
+		while(true) {
+			if(start1 == null && start2 == null) {
+				break;
+			}
+			if(start1 == null) {
+				L.pushBack(start2.data);
+				start2 = start2.next;
+				continue;
+			}
+			if(start2 == null) {
+				L.pushBack(start1.data);
+				start1 = start1.next;
+				continue;
+			}
+			if(start1.data < start2.data) {
+				L.pushBack(start1.data);
+				start1 = start1.next;
+			} else {
+				L.pushBack(start2.data);
+				start2 = start2.next;
+			}
+		}
+		return L;
+	}
+	
+	public SinglyLinkedList mergeSort() {
+		if(size() == 0) {
+			return this;
+		}
+		return mergeSort(this);
 	}
 	
 }

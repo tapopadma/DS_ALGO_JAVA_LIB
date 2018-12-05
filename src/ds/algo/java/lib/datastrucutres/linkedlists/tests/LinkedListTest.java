@@ -42,6 +42,15 @@ public class LinkedListTest {
 		L.sort();L.print();
 		L.clear();L.pushBack(5);L.sort();L.print();
 		L.pushBack(2);L.sort();L.print();
+		L.clear();
+		L.pushBack(1);
+		L.pushBack(4);
+		L.pushBack(3);
+		L.pushBack(2);
+		L.pushBack(5);
+		L.subList(1, 3).reverse().print();
+		L.reverse(1, 3).print();
+		L.reverse().mergeSort().print();
 	}
 
 }
