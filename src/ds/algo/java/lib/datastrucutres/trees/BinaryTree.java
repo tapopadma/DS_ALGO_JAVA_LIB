@@ -27,6 +27,14 @@ public class BinaryTree {
 		root = null;
 	}
 	
+	/**
+	 * Builds binary tree from postfix using Stack
+	 * @param postFix
+	 */
+	public BinaryTree buildFromPostFix(String postFix) {
+		return this;
+	}
+	
 	public void clear() {
 		root = null;
 	}
@@ -85,6 +93,6 @@ public class BinaryTree {
 		L.addLast(node.data);
 		L.addAll(convertToDoublyLinkedList(node.right));			
 		return L;
-	}
+	}	
 	
 }
