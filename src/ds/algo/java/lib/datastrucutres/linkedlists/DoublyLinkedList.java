@@ -1,16 +1,16 @@
 package ds.algo.java.lib.datastrucutres.linkedlists;
 
-public class DoublyLinkedList {
+public class DoublyLinkedList<T> {
 
-	class Node{
-		int data;
-		Node prev;
-		Node next;
-		public Node(int data){
+	public class Node{
+		public T data;
+		public Node prev;
+		public Node next;
+		public Node(T data){
 			this.data = data;
 			this.prev = this.next = null;
 		}
-		public Node(int data, Node prev, Node next) {
+		public Node(T data, Node prev, Node next) {
 			this.data = data;
 			this.prev = prev;
 			this.next = next;
@@ -25,13 +25,15 @@ public class DoublyLinkedList {
 		length = 0;
 	}
 	
-	public void insert(int position, int data) {
+	public Node insert(int position, T data) {
 		if(length == 0) {
 			head = new Node(data);
+			++length;
+			return head;
 		} else {
 			Node ptr = getNodeAt(position);
 			if(ptr == null) {
-				return;
+				return null;
 			}
 			Node ptrNext = ptr.next;
 			Node node = new Node(data, ptr, ptrNext);
@@ -39,24 +41,26 @@ public class DoublyLinkedList {
 			if(ptrNext != null) {
 				ptrNext.prev = node;			
 			}
+			++length;
+			return node;
 		}
-		++length;
 	}
 	
-	public void addLast(int data) {
+	public Node addLast(T data) {
 		if(size() == 0) {
 			head = new Node(data);
 			++length;
-			return;
+			return head;
 		}
 		Node tail = getNodeAt(length - 1);
 		Node node = new Node(data, tail, null);
 		tail.next = node;
 		tail = node;
 		++length;
+		return node;
 	}
 	
-	public void addAll(DoublyLinkedList L) {
+	public void addAll(DoublyLinkedList<T> L) {
 		if(size() == 0) {
 			this.head = L.getNodeAt(0);
 			this.length = L.size();
@@ -69,22 +73,29 @@ public class DoublyLinkedList {
 		this.length += L.size();
 	}
 	
-	public void addFirst(int data) {
+	public Node addFirst(T data) {
+		++length;
 		Node node = new Node(data, null, head);
+		if(head == null) {
+			head = node;
+			return head;
+		}
 		head.prev = node;
 		head = node;
-		++length;
+		return node;
 	}
 
-	public void removeLast() {
+	public Node removeLast() {
 		Node tail = getNodeAt(length - 1);
 		--length;
 		if(head == tail) {
 			head = null;
-			return;
+			return tail;
 		}
+		Node oldTail = tail;
 		tail = tail.prev;
 		tail.next = null;
+		return oldTail;
 	}
 	
 	public void removeFirst() {
@@ -114,7 +125,19 @@ public class DoublyLinkedList {
 		--length;
 	}
 	
-	public int get(int index) {
+	public void remove(Node node) {
+		--length;
+		if(head == null) {
+			return;
+		}
+		if(node == head) {
+			head = node.next;
+			return;
+		}
+		node.prev.next = node.next;
+	}
+	
+	public T get(int index) {
 		return getNodeAt(index).data;
 	}
 	
@@ -144,7 +167,7 @@ public class DoublyLinkedList {
 		return node;
 	}
 	
-	public DoublyLinkedList reverse() {
+	public DoublyLinkedList<T> reverse() {
 		reverse(head);
 		return this;
 	}

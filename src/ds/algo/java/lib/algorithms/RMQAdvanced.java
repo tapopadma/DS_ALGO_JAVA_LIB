@@ -31,6 +31,7 @@ import ds.algo.java.lib.io.FastInputReader;
  * queries without processing a magic index more than once
  * on the linkedlist and hence O(N).
  * Ref: https://codeforces.com/contest/1077/problem/F2
+ * Alternate Approach: dp
  * @author tapopadma
  *
  */
