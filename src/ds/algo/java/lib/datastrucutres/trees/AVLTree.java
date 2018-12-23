@@ -22,6 +22,26 @@ public class AVLTree{
 		}
 	}
 	Node root;
+	
+	public long maximumSmaller(long target) {
+		Node node = maximumSmaller(root, target);
+		return node == null ? -1 : node.data;
+	}
+	
+	Node maximumSmaller(Node node, long target) {
+		if(node == null) {
+			return null;
+		}
+		if(node.data >= target) {
+			return maximumSmaller(node.left, target);
+		}
+		Node res = maximumSmaller(node.right, target);
+		if(res == null) {
+			return node;
+		}
+		return res;
+	}
+	
 	public void add(long value) {
 		root = insert(root, value);
 	}
