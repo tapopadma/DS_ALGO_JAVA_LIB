@@ -77,10 +77,10 @@ public class SuffixArray implements StandardAlgoSolver {
 	 * @param y
 	 * @return
 	 */
-	int getLCP(int x, int y) {
+	int getLCP(int x, int y, int n) {
 		int ret = 0;
 		for(int i=stepsNeeded-1;i>=0;--i) {
-			if(P[i][x] == P[i][y]) {
+			if(x < n && y < n && P[i][x] == P[i][y]) {
 				ret += 1<<i;
 				x += 1<<i;
 				y += 1<<i;
@@ -103,7 +103,7 @@ public class SuffixArray implements StandardAlgoSolver {
 		int i = in.nextInt();
 		int j = in.nextInt();
 		out.println("LCP("+s.substring(i)
-		+","+s.substring(j)+"): "+getLCP(i, j));
+		+","+s.substring(j)+"): "+getLCP(i, j, n));
 	}
 
 }
