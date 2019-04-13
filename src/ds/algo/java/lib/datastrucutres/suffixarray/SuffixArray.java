@@ -1,14 +1,16 @@
-package ds.algo.java.lib.algorithms;
+package ds.algo.java.lib.datastrucutres.suffixarray;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
 
+import ds.algo.java.lib.algorithms.StandardAlgoSolver;
 import ds.algo.java.lib.io.FastInputReader;
 
 /**
  * This algorithm sorts suffixes of the string 
- * by using character matching at exponential pace.
- * O(n*logn*logn)
+ * by using string matching at exponential pace.
+ * O(n*logn*logn) if sorting used is not count sort
+ * O(nlogn) if it's a count sort(here)
  * @author tapopadma
  *
  */
@@ -41,12 +43,48 @@ public class SuffixArray implements StandardAlgoSolver {
 	 */
 	Triplet [] L;
 	
+	int [] count;
+	Triplet [] temp;
+	
+	void countSort() {
+		int n = L.length;
+		int range = Math.max(30, n + 1);
+	    count = new int[range];
+	    temp = new Triplet[n];
+	    for(int i=0;i<range;++i) {
+	    	count[i] = 0;
+	    }
+	    for(int i = 0 ;i < n ; i++) {
+	        ++count[L[i].second + 1];
+	    }
+	    for(int i = 1 ; i  < range ; i++) {
+	        count[i] += count[i-1];
+	    }
+	    for(int i = 0 ; i<n ; i++) {
+	        temp[count[L[i].second +1] - 1] = L[i];
+	        --count[L[i].second + 1];
+	    }  
+	    for(int i=0;i<range;++i) {
+	    	count[i] = 0;
+	    }
+	    for(int i = 0 ; i < n ; i ++) {
+	        ++count[temp[i].first + 1];
+	    }
+	    for(int i = 1 ; i<range ; i++) {
+	        count[i] += count[i-1];
+	    }
+	    for(int i = n- 1; i>=0 ; i--) {
+	        L[count[temp[i].first + 1] - 1] = temp[i];
+	        count[temp[i].first + 1]--;
+	    }
+	}
+	
 	void buildSuffixArray(String s) {
 		int n = s.length();
 		P = new int[20][n];
 		L = new Triplet[n];
 		for(int i=0;i<n;++i) {
-			P[0][i] = s.charAt(i);
+			P[0][i] = s.charAt(i) - 'a';
 		}
 		++stepsNeeded;
 		for(int cnt=1, stp=1;cnt<n;cnt<<=1,++stp, ++stepsNeeded) {
@@ -56,10 +94,7 @@ public class SuffixArray implements StandardAlgoSolver {
 						i+cnt < n ? P[stp-1][i+cnt] : -1,
 						i);
 			}
-			Arrays.sort(L, (t1, t2) -> 
-			t1.first.equals(t2.first)
-			? t1.second.compareTo(t2.second)
-			: t1.first.compareTo(t2.first));
+			countSort();//O(n)
 			for(int i=0;i<n;++i) {
 				P[stp][L[i].index] = (i > 0
 						&& L[i-1].first == L[i].first
