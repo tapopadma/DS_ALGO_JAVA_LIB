@@ -7,143 +7,115 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.Stack;
 import java.util.StringTokenizer;
-
-
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+ 
+ 
 public class Main {
-
+ 
 	static class Task {
 		
 		int NN = 200005;
-		int MOD = 1000000007;
+		int MOD = 998244353;
 		int INF = 2000000000;
-		long INFINITY = 2000000000000000000L;
-
-		int stepsNeeded=0;
-		
-		int [][] P;
-		
-		class Triplet {
-			Integer first, second, index;
-			public Triplet(int f, int s, int i) {
-				this.first = f;
-				this.second = s;
-				this.index = i;
-			}
-		}
-		
-		Triplet [] L;
-		
-		int [] count;
-		Triplet [] temp;
-		
-		void countSort() {
-			int n = L.length;
-			int range = Math.max(30, n + 1);
-		    count = new int[range];
-		    temp = new Triplet[n];
-		    for(int i=0;i<range;++i) {
-		    	count[i] = 0;
-		    }
-		    for(int i = 0 ;i < n ; i++) {
-		        ++count[L[i].second + 1];
-		    }
-		    for(int i = 1 ; i  < range ; i++) {
-		        count[i] += count[i-1];
-		    }
-		    for(int i = 0 ; i<n ; i++) {
-		        temp[count[L[i].second +1] - 1] = L[i];
-		        --count[L[i].second + 1];
-		    }  
-		    for(int i=0;i<range;++i) {
-		    	count[i] = 0;
-		    }
-		    for(int i = 0 ; i < n ; i ++) {
-		        ++count[temp[i].first + 1];
-		    }
-		    for(int i = 1 ; i<range ; i++) {
-		        count[i] += count[i-1];
-		    }
-		    for(int i = n- 1; i>=0 ; i--) {
-		        L[count[temp[i].first + 1] - 1] = temp[i];
-		        count[temp[i].first + 1]--;
-		    }
-		}
-		
-		void buildSuffixArray(String s) {
-			int n = s.length();
-			P = new int[20][n];
-			L = new Triplet[n];
-			for(int i=0;i<n;++i) {
-				P[0][i] = s.charAt(i) - 'a';
-			}
-			++stepsNeeded;
-			for(int cnt=1, stp=1;cnt<n;cnt<<=1,++stp, ++stepsNeeded) {
-				for(int i=0;i<n;++i) {
-					L[i] = new Triplet(
-							P[stp - 1][i],
-							i+cnt < n ? P[stp-1][i+cnt] : -1,
-							i);
-				}
-				countSort();
-				for(int i=0;i<n;++i) {
-					P[stp][L[i].index] = (i > 0
-							&& L[i-1].first == L[i].first
-							&& L[i-1].second == L[i].second
-							? P[stp][L[i-1].index] : i);
-				}
+		long INFINITY = (1L<<63)-1;
+ 
+		class Tuple {
+			Integer [] ara;
+			Integer x, y, z, t, w;
+			public Tuple(Integer... a) {
+				this.ara = a;
+				if(ara.length > 0) this.x = ara[0];
+				if(ara.length > 1) this.y = ara[1];
+				if(ara.length > 2) this.z = ara[2];
+				if(ara.length > 3) this.t = ara[3];
+				if(ara.length > 4) this.w = ara[4];
 			}
 		}
 
-		int getLCP(int x, int y, int n) {
-			int ret = 0;
-			for(int i=stepsNeeded-1;i>=0;--i) {
-				if(x < n && y < n && P[i][x] == P[i][y]) {
-					ret += 1<<i;
-					x += 1<<i;
-					y += 1<<i;
+		List<Integer>[]g;
+		Stack<Integer> s = new Stack<>();
+		boolean[] instack;boolean[] vis;
+
+		public void solve(InputReader in, PrintWriter out) throws Exception {
+			int n = in.nextInt();
+			int m = in.nextInt();
+			g=new ArrayList[n+1];
+			r=new int[n+1];
+			instack=new boolean[n+1];Arrays.fill(instack, false);
+			vis=new boolean[n+1];Arrays.fill(vis, false);
+			for(int i=1;i<=n;++i)g[i]=new ArrayList();
+			for(int i=1;i<=m;++i) {
+				int u = in.nextInt();
+				int v = in.nextInt();
+				g[u].add(v);
+			}
+			for(int i=1;i<=n;++i) {
+				Collections.sort(g[i], (u,v)->Integer.valueOf(v).compareTo(u));
+			}
+			for(int i=1;i<=n;++i){
+				if(hasCycle(i)){
+					out.println(-1);return;
 				}
 			}
-			return ret;
-		}
-		
-		public void solve(InputReader in, PrintWriter out) {
-			String s = in.next();
-			buildSuffixArray(s);
-			int n = s.length();
-			Triplet[] a = new Triplet[n];
-			long [] sum = new long[n];
-			for(int i=0;i<n;++i) {				
-				a[i] = new Triplet(n-L[i].index - (i > 0 ?
-						getLCP(L[i].index, L[i-1].index, n) : 0),
-						L[i].index, -1);
-				sum[i] = (i > 0 ? sum[i-1] : 0) + a[i].first;
+			Arrays.fill(vis, false);
+			for(int i=n;i>=1;--i) {
+				dfs(i);
 			}
-			int q = in.nextInt();
-			while(q-->0) {
-				int k = in.nextInt();
-				int lo = 0, hi = n - 1, mid = 0;
-				while(lo < hi) {
-					mid = (lo + hi) / 2;
-					if(sum[mid] < k) {
-						lo = mid + 1;
-					} else {
-						hi = mid;
-					}
-				}
-				int suffixIndex = a[lo].second;
-				int suffixLength = n - suffixIndex;
-				int distinctPrefixes = a[lo].first;
-				k -= (lo > 0 ? sum[lo - 1] : 0);
-				int endIndex = suffixLength - distinctPrefixes
-						+ k - 1;
-				out.println(s.substring(suffixIndex, suffixIndex + endIndex + 1));
+			TreeSet<Integer>q=new TreeSet<>((i,j)->
+			r[i]==r[j]?Integer.valueOf(i).compareTo(j)
+			:Integer.valueOf(r[j]).compareTo(r[i]));
+			for(int i=1;i<=n;++i){
+				q.add(i);
 			}
+			while(!q.isEmpty()) {
+				out.print(q.pollFirst()+" ");
+			}
+			out.println();
 		}
-		
+
+		int []r;
+
+		int dfs(int x) {
+			if(vis[x])return -1;
+			int mx = -1;
+			vis[x]=true;
+			for(int y:g[x]) {
+				mx = Math.max(mx, dfs(y));
+			}
+			s.push(x);
+			r[x]=mx+1;
+			return r[x];
+		}
+
+		boolean hasCycle(int x) {
+			if(instack[x])return true;
+			if(vis[x])return false;
+			vis[x]=true;
+			instack[x]=true;
+			for(int y:g[x]) {
+				if(hasCycle(y))return true;
+			}
+			instack[x]=false;
+			return false;
+		}
+
 	}
 	
-	static void prepareIO(boolean isFileIO) {
+	static void prepareIO(boolean isFileIO) throws Exception {
 		//long t1 = System.currentTimeMillis();
 		Task solver = new Task();
 		// Standard IO
@@ -173,14 +145,14 @@ public class Main {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
         prepareIO(false);
 	}
 	
 	static class InputReader {
         public BufferedReader reader;
         public StringTokenizer tokenizer;
-
+ 
         public InputReader(InputStream stream) {
             reader = new BufferedReader(new InputStreamReader(stream), 32768);
             tokenizer = null;
@@ -218,19 +190,19 @@ public class Main {
             }
             return tokenizer.nextToken();
         }
-
+ 
         public int nextInt() {
             return Integer.parseInt(next());
         }
-
+ 
         public long nextLong() {
             return Long.parseLong(next());
         }
-
+ 
         public double nextDouble() {
         	return Double.parseDouble(next());
         }
         
     }
-
+ 
 }
