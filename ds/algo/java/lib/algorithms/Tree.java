@@ -32,8 +32,12 @@ public class Tree implements StandardAlgoSolver{
      * 
      * Logic: any 2 farthest distance away pair would always pass through the diameter.
      * 
-     * ALTERNATIVE: max(sum(max1,max2) for each node) 
+     * ALTERNATIVE 1: max(sum(max1,max2) for each node) 
      * using dfs https://www.spoj.com/submit/PT07Z/id=28570086.
+     * 
+     * ALTERNATIVE 2: sum of top 2 depths vs max of already calculated diameter 
+     * in the subtrees using dfs
+     * https://www.spoj.com/submit/PT07Z/id=28617765.
      * @param g
      * @return tuple(start, end, diameter)
      */
