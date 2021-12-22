@@ -22,6 +22,7 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.*;
  
  
 public class Main {
@@ -46,71 +47,17 @@ public class Main {
 			}
 		}
 
-		List<Integer>[]g;
-		Stack<Integer> s = new Stack<>();
-		boolean[] instack;boolean[] vis;
+		class C{
+			public static Map<String,Integer> mp=new HashMap<>();
+			public C(int k){
+				mp.put(String.valueOf(k),k);
+			}
+		}
 
 		public void solve(InputReader in, PrintWriter out) throws Exception {
-			int n = in.nextInt();
-			int m = in.nextInt();
-			g=new ArrayList[n+1];
-			r=new int[n+1];
-			instack=new boolean[n+1];Arrays.fill(instack, false);
-			vis=new boolean[n+1];Arrays.fill(vis, false);
-			for(int i=1;i<=n;++i)g[i]=new ArrayList();
-			for(int i=1;i<=m;++i) {
-				int u = in.nextInt();
-				int v = in.nextInt();
-				g[u].add(v);
-			}
-			for(int i=1;i<=n;++i) {
-				Collections.sort(g[i], (u,v)->Integer.valueOf(v).compareTo(u));
-			}
-			for(int i=1;i<=n;++i){
-				if(hasCycle(i)){
-					out.println(-1);return;
-				}
-			}
-			Arrays.fill(vis, false);
-			for(int i=n;i>=1;--i) {
-				dfs(i);
-			}
-			TreeSet<Integer>q=new TreeSet<>((i,j)->
-			r[i]==r[j]?Integer.valueOf(i).compareTo(j)
-			:Integer.valueOf(r[j]).compareTo(r[i]));
-			for(int i=1;i<=n;++i){
-				q.add(i);
-			}
-			while(!q.isEmpty()) {
-				out.print(q.pollFirst()+" ");
-			}
-			out.println();
-		}
-
-		int []r;
-
-		int dfs(int x) {
-			if(vis[x])return -1;
-			int mx = -1;
-			vis[x]=true;
-			for(int y:g[x]) {
-				mx = Math.max(mx, dfs(y));
-			}
-			s.push(x);
-			r[x]=mx+1;
-			return r[x];
-		}
-
-		boolean hasCycle(int x) {
-			if(instack[x])return true;
-			if(vis[x])return false;
-			vis[x]=true;
-			instack[x]=true;
-			for(int y:g[x]) {
-				if(hasCycle(y))return true;
-			}
-			instack[x]=false;
-			return false;
+			C c1=new C(3);
+			C c2=new C(5);
+			out.println(c1.mp);out.println(c2.mp);
 		}
 
 	}
