@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.*;
+import java.text.*;
  
  
 public class Main {
@@ -47,17 +48,8 @@ public class Main {
 			}
 		}
 
-		class C{
-			public static Map<String,Integer> mp=new HashMap<>();
-			public C(int k){
-				mp.put(String.valueOf(k),k);
-			}
-		}
-
 		public void solve(InputReader in, PrintWriter out) throws Exception {
-			C c1=new C(3);
-			C c2=new C(5);
-			out.println(c1.mp);out.println(c2.mp);
+			
 		}
 
 	}
@@ -87,13 +79,15 @@ public class Main {
 				e.printStackTrace();
 			}
 	        solver.solve(fin, fout);
-	        //fout.println("time(s): " + (1.0*(System.currentTimeMillis()-t1))/1000.0);
+	        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss yyyy-MM-dd");
+			Date date = new Date();
+	        fout.println("\n\ntime(s): " + dateFormat.format(date));
 	        fout.close();
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-        prepareIO(false);
+        prepareIO(args[0].equals("true"));
 	}
 	
 	static class InputReader {
