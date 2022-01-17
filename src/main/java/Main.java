@@ -16,11 +16,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.*;
 import java.text.*;
@@ -47,7 +49,7 @@ public class Main {
 				if(ara.length > 4) this.w = ara[4];
 			}
 		}
-
+		
 		public void solve(InputReader in, PrintWriter out) throws Exception {
 			
 		}
@@ -87,7 +89,7 @@ public class Main {
 	}
 	
 	public static void main(String[] args) throws Exception {
-        prepareIO(args[0].equals("true"));
+        prepareIO(false/*args[0].equals("true")*/);
 	}
 	
 	static class InputReader {
