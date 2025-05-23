@@ -1,5 +1,7 @@
 package ds.algo.java.lib.datastrucutres.linkedlists;
 
+import java.util.Stack;
+
 public class SinglyLinkedList extends UniDirectionalLinkedList {
 
   public SinglyLinkedList() {
@@ -401,4 +403,78 @@ public class SinglyLinkedList extends UniDirectionalLinkedList {
     }
     return this;
   }
+
+  // Grab the middle element (skip middle for odd size) in a variable. Push all the elements 
+  // in the first half (skip middle for odd size) to a stack. In iteration pop from stack and link
+  // it to the variable, update the variable to its next.
+  // alternate is to use auxillary deque to perform easy insertions.
+  public SinglyLinkedList alternateFirstAndLastElements() {
+    if(length < 3) {
+      return this;
+    }
+    Node middle = head;
+    Node fast = head;
+    while(fast != null && fast.next != null) {
+      fast = fast.next.next;
+      if(fast != null && fast.next != null) {
+        middle = middle.next;
+      }
+    }
+    Stack<Node> q = new Stack<>();
+    Node cur = head;
+    while(true) {
+      q.push(cur);
+      if(cur == middle) {
+        break;
+      }
+      cur = cur.next;
+    }
+    Node second = middle;
+    if(length%2 == 0) {
+      second = middle.next;
+      middle.next = null;
+    } else {
+      second = middle.next.next;
+      middle.next.next = null;
+    }
+    while(!q.isEmpty()) {
+      Node first = q.pop();
+      Node firstNext = first.next;
+      first.next = second;
+      Node secondNext = second.next;
+      second.next = firstNext;
+      second = secondNext;
+    }
+    return this;
+  }
+
+  Node reverseCurrentGroup(Node cur, Node stop) {
+    if(cur.next == stop) {
+      return cur;
+    }
+    Node newHead = reverseCurrentGroup(cur.next, stop);
+    cur.next.next = cur;
+    return newHead;
+  }
+
+  Node reverseInGroupofK(Node cur, int k) {
+    if(cur == null) {
+      return null;
+    }
+    Node ptr = cur;
+    for(int i=0;i<k && ptr != null;++i) {
+      ptr = ptr.next;
+    }
+    Node nextCur = reverseInGroupofK(ptr, k);
+    Node newHead = reverseCurrentGroup(cur, ptr);
+    cur.next = nextCur;
+    return newHead;
+  }
+
+  // recursively solve for the subsequent part of the linkedlist, reverse first part, connect both parts and return new head.
+  public SinglyLinkedList reverseInGroupofK(int k) {
+    head = reverseInGroupofK(head, k);
+    return this;
+  }
+
 }

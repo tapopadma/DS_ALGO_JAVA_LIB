@@ -70,5 +70,20 @@ public class LinkedListTest {
     L.rotateLeft(L.getNodeAt(0), L.getNodeAt(2)).print();
     L.rotateLeft(L.getNodeAt(0), L.getNodeAt(1)).print();
     L.rotateLeft(L.getNodeAt(4), L.getNodeAt(4)).print();
+    L.clear();
+    L.pushBack(1);L.pushBack(2);L.pushBack(3);
+    L.alternateFirstAndLastElements().print();
+    L.clear();
+    L.pushBack(1);L.pushBack(2);L.pushBack(3);L.pushBack(4);
+    L.alternateFirstAndLastElements().print();
+    L.clear();
+    L.pushBack(1);L.pushBack(2);L.pushBack(3);L.pushBack(4);L.pushBack(5);
+    L.alternateFirstAndLastElements().print();
+    L.clear();
+    L.pushBack(1);L.pushBack(2);L.pushBack(3);L.pushBack(4);L.pushBack(5);L.pushBack(6);
+    L.reverseInGroupofK(2).print();
+    L.clear();
+    L.pushBack(1);L.pushBack(2);L.pushBack(3);L.pushBack(4);L.pushBack(5);L.pushBack(6);
+    L.reverseInGroupofK(4).print();
   }
 }

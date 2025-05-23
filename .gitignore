@@ -6,3 +6,4 @@ target/
 libs/
 *.class
 *BUILD
+all_sources.txt

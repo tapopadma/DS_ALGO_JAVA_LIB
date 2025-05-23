@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.Deque;
+import java.util.ArrayDeque;
 
 /**
  * For simplicity avoid duplication of keys
@@ -441,5 +443,39 @@ public class BinaryTree {
       }
     }
     return pa[data1][0];
+  }
+
+  // just use one deque and pop everything from back and push its children to front right to left if level is even, else
+  // pop everything from front and push its chidlren to back from right to left.
+  public void spiralOrder() {
+    Deque<Node> q = new ArrayDeque<>();
+    q.addFirst(root);
+    boolean east = false;
+    while(!q.isEmpty()) {
+      int size = q.size();
+      while(size-- > 0) {
+        if(!east) {
+          Node cur = q.removeLast();
+          System.out.print(cur.data + " ");
+          if(cur.right != null) {
+            q.addFirst(cur.right);
+          }
+          if(cur.left != null){
+            q.addFirst(cur.left);
+          }
+        } else {
+          Node cur = q.removeFirst();
+          System.out.print(cur.data + " ");
+          if(cur.left != null){
+            q.addLast(cur.left);
+          }
+          if(cur.right != null) {
+            q.addLast(cur.right);
+          }
+        }
+      }
+      east = !east;
+    }
+    System.out.println("");
   }
 }

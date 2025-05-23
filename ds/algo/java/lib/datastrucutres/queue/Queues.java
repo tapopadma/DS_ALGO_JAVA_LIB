@@ -58,9 +58,46 @@ public class Queues implements StandardAlgoSolver {
     }
   }
 
+
+  // The usual array based queue implementation is straightforward for enqueueing but takes O(n) time for Dequeing.
+  // The circular array based queue implementation is O(1) for all where the actual queue just floats around the circle
+  // based on operations. Similar approach can be used for Deques too.
+  public void buildQueueWithCircularArray(List<Integer> l) {
+    System.out.println("buildQueueWithCircularArray==");
+    int[] arr = new int[l.size()];
+    int front = 0;
+    int size = 0;
+    for(int i=0;i < l.size()/2;++i) {
+      System.out.println("pushing " + l.get(i));
+      arr[(front + size)%l.size()] = l.get(i);
+      size++;
+    }
+    for(int i=0;i < l.size()/2;++i) {
+      int popped = arr[front];
+      System.out.println("popping " + popped);
+      front = (front + 1)%l.size();
+      size--;
+      System.out.println("pushing " + popped);
+      arr[(front + size)%l.size()] = popped;
+      size++;
+    }
+    for(int i=l.size()/2;i < l.size();++i) {
+      System.out.println("pushing " + l.get(i));
+      arr[(front + size)%l.size()] = l.get(i);
+      size++;
+    }
+    for(int i=0;i < l.size();++i) {
+      int popped = arr[front];
+      System.out.println("popping " + popped);
+      front = (front + 1)%l.size();
+      size--;
+    }
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     buildStackWithOneQueue(Arrays.asList(1, 2, 3, 4, 5));
     buildQueueWithOneStackNRecursion(Arrays.asList(1, 2, 3, 4, 5));
+    buildQueueWithCircularArray(Arrays.asList(1, 2, 3, 4, 5, 6));
   }
 }

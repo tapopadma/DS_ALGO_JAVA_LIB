@@ -3,6 +3,7 @@ package ds.algo.java.lib.algorithms;
 import ds.algo.java.lib.io.FastInputReader;
 import java.io.PrintWriter;
 import java.util.Stack;
+import java.lang.Math;
 
 /** Infix to postfix then evaluate postfix to evaluate expressions. */
 public class ArithmeticExpression implements StandardAlgoSolver {

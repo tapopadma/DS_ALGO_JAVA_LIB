@@ -55,5 +55,6 @@ public class BinaryTreeTest {
     T.iterativeInOrder();
     T.fetchIterativeAncestorList(n7);
     T.fetchRightView();
+    T.spiralOrder();
   }
 }
