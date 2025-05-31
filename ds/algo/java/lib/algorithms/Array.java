@@ -10,6 +10,9 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Stack;
 import java.lang.Math;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 public class Array implements StandardAlgoSolver {
 
@@ -267,6 +270,124 @@ public class Array implements StandardAlgoSolver {
     return ans;
   }
 
+  class NonRepeatingElementSubArrayNode {
+    public int i;
+    public int po;
+    public int no;
+    public NonRepeatingElementSubArrayNode() {}
+  }
+
+  class NonRepeatingElementSubArraySegmentTree {
+    int n;
+    int[] T;
+    static final int MIN = -2000000000;
+    public NonRepeatingElementSubArraySegmentTree(int n){
+      this.n = n;
+      T = new int[n*4];
+      for(int i=0;i<n*4;++i) {
+        T[i] = MIN;
+      }
+    }
+    void update(int i, int l, int r, int x, int v) {
+      if(x > r || x < l){
+        return;
+      }
+      if(l == r) {
+        T[i] = v;
+        return;
+      }
+      int m= (l + r) / 2;
+      update(i*2, l, m, x, v);
+      update(1+i*2, 1+m, r, x, v);
+      T[i] = Math.max(T[i*2], T[i*2+1]);
+    }
+    public void update(int x, int v) {
+      update(1, 1, n, x, v);
+    }
+    int query(int i, int l, int r, int x, int y) {
+      if(x > r || y < l) {
+        return MIN;
+      }
+      if(x <= l && r <= y) {
+        return T[i];
+      }
+      int m = (l + r) / 2;
+      return Math.max(query(2*i, l, m, x, y), query(1+2*i, 1+m, r, x, y));
+    }
+    public int query(int x, int y) {
+      return query(1, 1, n, x, y);
+    }
+  }
+
+  // To be able to say if there's an element in a subarray [L,R] whose frequency is exactly 1,
+  // we should just check if its previous occurence po and next occurence no are < l and > r respectively.
+  //
+  // Just storing an element along with its both occurences (po,i,no) and sorting based on po and then
+  // finding prefix maximum no for i in given [L,R] in the query such that prefix contains only elements with po < L
+  // should be enough. For po to be < L, offline processing of queries is necessary and For storing range maximum segment
+  // tree is necessary. O(NlogN + QlogN), O(N).
+  void checkNonRepeatingElementExistenceInSubarray(List<Integer> l, List<List<Integer>> queries) {
+    Map<Integer, Integer> mp = new HashMap<>();
+    List<NonRepeatingElementSubArrayNode> list = new ArrayList<>();
+    for(int i=0;i<l.size();++i) {
+      NonRepeatingElementSubArrayNode node = new NonRepeatingElementSubArrayNode();
+      node.i = i;
+      node.po = mp.containsKey(l.get(i)) ? mp.get(l.get(i)) : -1;
+      list.add(node);
+      mp.put(l.get(i), i);
+    }
+    mp.clear();
+    for(int i=l.size()-1;i>=0;--i) {
+      list.get(i).no = mp.containsKey(l.get(i)) ? mp.get(l.get(i)) : l.size();
+      mp.put(l.get(i), i);
+    }
+    Collections.sort(list, (n1, n2) -> Integer.valueOf(n1.po).compareTo(n2.po));
+    for(int i=0;i< queries.size();++i) {
+      queries.get(i).add(i);
+    }
+    boolean[] ans = new boolean[queries.size()];
+    Collections.sort(queries, (query1, query2) -> Integer.valueOf(query1.get(0)).compareTo(query2.get(0)));
+    NonRepeatingElementSubArraySegmentTree tree = new NonRepeatingElementSubArraySegmentTree(l.size() + 1);
+    int i = 0, j = 0;
+    while(j < queries.size()) {
+      while(i < list.size() && list.get(i).po + 1 < queries.get(j).get(0)) {
+        tree.update(list.get(i).i + 1, list.get(i).no + 1);
+        ++i;
+      }
+      ans[queries.get(j).get(2)] = tree.query(queries.get(j).get(0), queries.get(j).get(1)) > queries.get(j).get(1);
+      ++j;
+    }
+    for(boolean yn: ans) {
+      System.out.print(yn ? "Yes " : "No ");
+    }
+    System.out.println();
+  }
+
+  public int minSwapsToSortArray(List<Integer> l) {
+    List<Integer> lcopy = new ArrayList<>(l);
+    Collections.sort(lcopy);
+    Map<Integer, Integer> mp = new HashMap<>();
+    for(int i=0;i<l.size();++i) {
+      mp.put(lcopy.get(i), i);
+    }
+    int ans = 0;
+    boolean[] vis = new boolean[Collections.max(l)+1];
+    for(int i=0;i<l.size();++i) {
+      int x = l.get(i);
+      if(vis[x] || mp.get(x)==i) {
+        continue;
+      }
+      int cnt = 0;
+      while(!vis[x]) {
+        ++cnt;
+        vis[x] = true;
+        x = l.get(mp.get(x));
+      }
+      ans += cnt - 1;
+    }
+    return ans;
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(
@@ -284,5 +405,8 @@ public class Array implements StandardAlgoSolver {
     validateLogic(largestSubArrayWithMaxAnyPairDiffNotMoreThanX(Arrays.asList(5, 10, 1, 2, 4, 7, 2), 5), 4);
     validateLogic(maximumSumSubSequenceWithAtmostKDistantConsecutiveElements(Arrays.asList(10, -5, -2, 4, 0, 3), 3), 17);
     validateLogic(maximumSumSubSequenceWithAtmostKDistantConsecutiveElements(Arrays.asList(1, -5, -20, 4, -1, 3, -6, -3), 2), 0);
+    checkNonRepeatingElementExistenceInSubarray(Arrays.asList(1,2,1,3,2,3,4,4,2,3,5,6,2,1,8,9,2),
+      Arrays.asList(dynamicList(1, 6),dynamicList(7,8), dynamicList(6, 10), dynamicList(1, 17)));
+    validateLogic(minSwapsToSortArray(Arrays.asList(10, 19, 6, 3, 5)), 2);
   }
 }

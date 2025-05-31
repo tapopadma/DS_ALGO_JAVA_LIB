@@ -5,7 +5,7 @@ import ds.algo.java.lib.datastrucutres.linkedlists.DoublyLinkedList;
 public class DoublyLinkedListTest {
 
 	public static void main(String[] args) {
-		DoublyLinkedList L = new DoublyLinkedList();
+		DoublyLinkedList<Integer> L = new DoublyLinkedList<>();
 		L.insert(0, 1);
 		L.insert(0, 2);
 		L.insert(1, 3);
@@ -20,6 +20,12 @@ public class DoublyLinkedListTest {
 		L.removeAt(4);L.print();
 		L.removeLast();L.print();
 		L.reverse().print();
+		L.clear();
+		L.addLast(1);L.addLast(2);L.addLast(5);L.addLast(8);
+		DoublyLinkedList<Integer> L1 = new DoublyLinkedList<>();
+		L1.addLast(3);L1.addLast(4);L1.addLast(6);L1.addLast(7);
+		L = L.merge(L1);
+		L.print();
 	}
 
 }

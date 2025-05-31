@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Arrays;
 
 /**
  * For simplicity avoid duplication of keys
@@ -18,19 +21,36 @@ import java.util.ArrayDeque;
  */
 public class BinaryTree {
 
-  public class Node {
-    Node left;
-    Node right;
-    int data;
+  public static class Node {
+    public Node left;
+    public Node right;
+    public int data;
 
     public Node(Node left, Node right, int value) {
       this.left = left;
       this.right = right;
       this.data = value;
     }
+
+    public Node(int value) {
+      this.left = null;
+      this.right = null;
+      this.data = value;
+    }
+
+    public Node addLeft(int value) {
+      this.left = new Node(null, null, value);
+      return this.left;
+    }
+    public Node addRight(int value) {
+      this.right = new Node(null, null, value);
+      return this.right;
+    }
   }
 
-  protected Node root;
+  public Node root;
+  int[] level;
+  int[][] pa;
 
   public BinaryTree() {
     root = null;
@@ -98,24 +118,50 @@ public class BinaryTree {
     }
   }
 
-  // push current root to stack, pop current root. if the current root's left child
+  // Simply visit to the left most while pushing to stack, pop last to add to o/p, then repeat for its right child or until stack is empty. O(n),O(h).
+  //
+  // alternative: O(n),O(n) push current root to stack, pop current root. if the current root's left child
   // exists (i.e. not processed to output yet), add the right child then current root then its left
   // child to the stack, else just add the current root to the output.
   public void iterativeInOrder() {
     List<Integer> l = new ArrayList<>();
-    Set<Integer> processed = new HashSet<>();
     Stack<Node> q = new Stack<>();
-    q.push(root);
-    while (!q.isEmpty()) {
-      Node cur = q.pop();
-      if (cur.left != null && !processed.contains(cur.left.data)) {
+    Node cur = root;
+    while (cur != null || !q.isEmpty()) {
+      while(cur != null) {
         q.push(cur);
-        q.push(cur.left);
-      } else {
+        cur = cur.left;
+      }
+      cur = q.pop();
+      l.add(cur.data);
+      cur = cur.right;
+    }
+    for (int i : l) {
+      System.out.print(i + " ");
+    }
+    System.out.println("");
+  }
+
+  // O(n) O(1). Morris traversal is about joining inorder predecessor node to current node through a right pointer and later destroying it.
+  public void iterativeInOrderMorrisTraversal() {
+    List<Integer> l = new ArrayList<>();
+    Node cur = root;
+    while(cur != null) {
+      if(cur.left == null) {
         l.add(cur.data);
-        processed.add(cur.data);
-        if (cur.right != null) {
-          q.push(cur.right);
+        cur = cur.right;
+      } else {
+        Node prev = cur.left;
+        while(prev.right != null && prev.right != cur) {
+          prev = prev.right;
+        }
+        if(prev.right == null) {
+          prev.right = cur;
+          cur = cur.left;
+        } else {
+          prev.right = null;
+          l.add(cur.data);
+          cur = cur.right;
         }
       }
     }
@@ -180,10 +226,83 @@ public class BinaryTree {
     return node;
   }
 
+  int deepestRightMost(Node root) {
+    if(root == null) {
+      return -1;
+    }
+    Queue<Node> q = new ArrayDeque<>();
+    q.add(root);
+    int res = root.data;
+    while(!q.isEmpty()) {
+      Node cur = q.poll();
+      res = cur.data;
+      if(cur.left != null) {
+        q.add(cur.left);
+      }
+      if(cur.right != null) {
+        q.add(cur.right);
+      }
+    }
+    return res;
+  }
+
+  public void delete(int data) {
+    // random strategy: replace target with deepest right most node and delete latter.
+    int deepestRightMostData = deepestRightMost(root);
+    root = deleteLeaf(root, deepestRightMostData);
+    root = removeActualDeletedData(root, data, deepestRightMostData);
+  }
+
+  Node removeActualDeletedData(Node cur, int data, int deepestRightMostData) {
+    if(cur ==  null) {
+      return cur;
+    }
+    if(cur.data == data) {
+      cur.data = deepestRightMostData;
+      return cur;
+    }
+    cur.left = removeActualDeletedData(cur.left, data, deepestRightMostData);
+    cur.right = removeActualDeletedData(cur.right, data, deepestRightMostData);
+    return cur;
+  }
+
+  Node deleteLeaf(Node cur, int target) {
+    if(cur == null) {
+      return cur;
+    }
+    if(cur.data == target) {
+      return null;
+    }
+    cur.left = deleteLeaf(cur.left, target);
+    cur.right = deleteLeaf(cur.right, target);
+    return cur;
+  }
+
+  Node convertFromDoublyLinkedList(DoublyLinkedList<Integer>.Node head, DoublyLinkedList<Integer>.Node end) {
+    if(head == end) {
+      return null;
+    }
+    DoublyLinkedList<Integer>.Node ptr1 = head, ptr2 = head;
+    while(ptr2.next != end && ptr2.next.next != end) {
+      ptr2 = ptr2.next.next;
+      ptr1 = ptr1.next;
+    }
+    Node cur = new Node(ptr1.data);
+    cur.left = (ptr1 == head ? null : convertFromDoublyLinkedList(head, ptr1));
+    cur.right = convertFromDoublyLinkedList(ptr1.next, end);
+    return cur;
+  }
+
+  public BinaryTree convertFromDoublyLinkedList(DoublyLinkedList<Integer> l) {
+    root = convertFromDoublyLinkedList(l.head, null);
+    return this;
+  }
+
   public DoublyLinkedList<Integer> convertToDoublyLinkedList() {
     return convertToDoublyLinkedList(root);
   }
 
+  // alternative is to inorder traverse using morris approach w/o destroying right pointers and construct dll accordingly.
   DoublyLinkedList<Integer> convertToDoublyLinkedList(Node node) {
     DoublyLinkedList<Integer> L = new DoublyLinkedList<>();
     if (node == null) {
@@ -387,19 +506,19 @@ public class BinaryTree {
     return size(root);
   }
 
-  void dfs(Node cur, Node prev, int[][] pa, int[] depth) {
+  void dfs(Node cur, Node prev, int[][] pa, int[] level) {
     if (cur == null) {
       return;
     }
     if (prev == null) {
       pa[cur.data][0] = -1;
-      depth[cur.data] = 0;
+      level[cur.data] = 0;
     } else {
       pa[cur.data][0] = prev.data;
-      depth[cur.data] = depth[prev.data] + 1;
+      level[cur.data] = level[prev.data] + 1;
     }
-    dfs(cur.left, cur, pa, depth);
-    dfs(cur.right, cur, pa, depth);
+    dfs(cur.left, cur, pa, level);
+    dfs(cur.right, cur, pa, level);
   }
 
   /**
@@ -411,9 +530,9 @@ public class BinaryTree {
    */
   public int LCA(int data1, int data2) {
     int n = size();
-    int[][] pa = new int[n + 1][30];
-    int[] depth = new int[n + 1];
-    dfs(root, null, pa, depth);
+    pa = new int[n + 1][30];
+    level = new int[n + 1];
+    dfs(root, null, pa, level);
     for (int j = 1; j < 30; ++j) {
       for (int i = 1; i <= n; ++i) {
         if (pa[i][j - 1] != -1) {
@@ -423,13 +542,13 @@ public class BinaryTree {
         }
       }
     }
-    if (depth[data1] > depth[data2]) {
+    if (level[data1] > level[data2]) {
       int temp = data1;
       data1 = data2;
       data2 = temp;
     }
     for (int j = 29; j >= 0; --j) {
-      if (pa[data2][j] != -1 && depth[pa[data2][j]] >= depth[data1]) {
+      if (pa[data2][j] != -1 && level[pa[data2][j]] >= level[data1]) {
         data2 = pa[data2][j];
       }
     }
@@ -443,6 +562,23 @@ public class BinaryTree {
       }
     }
     return pa[data1][0];
+  }
+
+  // normal bfs
+  public void levelOrder() {
+    Queue<Node> q = new LinkedList<>();
+    q.add(root);
+    while(!q.isEmpty()) {
+      Node cur = q.poll();
+      System.out.print(cur.data + " ");
+      if(cur.left != null) {
+        q.add(cur.left);
+      }
+      if(cur.right != null) {
+        q.add(cur.right);
+      }
+    }
+    System.out.println("");
   }
 
   // just use one deque and pop everything from back and push its children to front right to left if level is even, else
@@ -478,4 +614,258 @@ public class BinaryTree {
     }
     System.out.println("");
   }
+
+  int depthOrHeight(Node cur) {
+    if(cur == null) {
+      return -1;
+    }
+    return Math.max(depthOrHeight(cur.left), depthOrHeight(cur.right)) + 1;
+  }
+
+  public int depthOrHeight() {
+    return depthOrHeight(root);
+  }
+
+  List<Integer> allChildrenKdistanceFromTargetNode(Node cur, int k) {
+    List<Integer> ret = new ArrayList<>();
+    if(cur == null || k < 0) {
+      return ret;
+    }
+    if(k == 0) {
+      ret.add(cur.data);
+      return ret;
+    }
+    ret.addAll(allChildrenKdistanceFromTargetNode(cur.left, k-1));
+    ret.addAll(allChildrenKdistanceFromTargetNode(cur.right, k-1));
+    return ret;
+  }
+
+  int allNodesKdistanceFromTargetNode(Node cur, int target, List<Integer> l, int k) {
+    if(cur == null) {
+      return -1;
+    }
+    if(cur.data == target) {
+      l.addAll(allChildrenKdistanceFromTargetNode(cur, k));
+      return 0;
+    }
+    int dl = allNodesKdistanceFromTargetNode(cur.left, target, l, k);
+    if(dl >= 0) {
+      if(k==dl+1) {
+        l.add(cur.data);
+      } else {
+        l.addAll(allChildrenKdistanceFromTargetNode(cur.right, k-dl-1-1));
+      }
+      return dl + 1;
+    }
+    int dr = allNodesKdistanceFromTargetNode(cur.right, target, l, k);
+    if(dr >= 0) {
+      if(k==dr+1) {
+        l.add(cur.data);
+      } else {
+        l.addAll(allChildrenKdistanceFromTargetNode(cur.left, k-dr-1-1));
+      }
+      return dr + 1;
+    }
+    return -1;
+  }
+
+  // assume each node with distinct value.
+  // Basically use a dfs to search target then invoke a method to list all nodes at k-x distance away from each relevant node as root.
+  // descendants of target and those of its parents are the relevant nodes.a
+  public void allNodesKdistanceFromTargetNode(int target, int k) {
+    List<Integer> l = new ArrayList<>();
+    allNodesKdistanceFromTargetNode(root, target, l, k);
+    for(int i: l) {
+      System.out.print(i + " ");
+    }
+    System.out.println("");
+  }
+
+  int[] maxPathSumBetweenLeaves(Node cur) {
+    if(cur == null) {
+      return new int[]{0,0};
+    }
+    int [] retl = maxPathSumBetweenLeaves(cur.left);
+    int [] retr = maxPathSumBetweenLeaves(cur.right);
+    int maxCostDepth = cur.data + Math.max(retl[0], retr[0]);
+    int maxPathSum = Math.max(retl[1], Math.max(retr[1], cur.data + retl[0] + retr[0]));
+    return new int[]{maxCostDepth, maxPathSum};
+  }
+
+  // find max sum starting from left subtree + right subtree + root. search similarly in both left n right subtree.
+  public int maxPathSumBetweenLeaves() {
+    return maxPathSumBetweenLeaves(root)[1];
+  }
+
+  List<List<Integer>> prependToPaths(int e, List<List<Integer>> paths) {
+    for(List<Integer> path: paths) {
+      path.add(0, e);
+    }
+    return paths;
+  }
+
+  List<List<Integer>> allDownwardPathsOfSumKStartingFromNode(Node cur, int k) {
+    List<List<Integer>> ret = new ArrayList<>();
+    if(cur == null) {
+      return ret;
+    }
+    if(cur.data == k){
+      ret.add(new ArrayList<>(List.of(cur.data)));
+    }
+    ret.addAll(prependToPaths(cur.data, allDownwardPathsOfSumKStartingFromNode(cur.left, k-cur.data)));
+    ret.addAll(prependToPaths(cur.data, allDownwardPathsOfSumKStartingFromNode(cur.right, k-cur.data)));
+    return ret;
+  }
+
+  List<List<Integer>> allDownwardPathsOfSumK(Node cur, int k) {
+    List<List<Integer>> ret = new ArrayList<>();
+    if(cur == null) {
+      return ret;
+    }
+    ret.addAll(allDownwardPathsOfSumKStartingFromNode(cur, k));
+    ret.addAll(allDownwardPathsOfSumK(cur.left, k));
+    ret.addAll(allDownwardPathsOfSumK(cur.right, k));
+    return ret;
+  }
+
+  // for each root grab all paths starting from it and then recursively grab the same for all its descendants.
+  public void allDownwardPathsOfSumK(int k) {
+    List<List<Integer>> l = allDownwardPathsOfSumK(root, k);
+    for(List<Integer> path: l) {
+      for(int i: path) {
+        System.out.print(i + "->");
+      }
+      System.out.println("");
+    }
+  }
+
+  // there's a O(1) space approach using morris traversal that will track all leaves in left subtree before right. 
+  // in fact morris traversal can be a replacement of recursing a tree in general.
+  List<Integer> grabLeaves(Node cur) {
+    List<Integer> ret = new ArrayList<>();
+    if(cur == null) {
+      return ret;
+    }
+    if(cur.left == null && cur.right == null) {
+      ret.add(cur.data);
+    }
+    ret.addAll(grabLeaves(cur.left));
+    ret.addAll(grabLeaves(cur.right));
+    return ret;
+  }
+
+  // root + left branach from root's child till last non-leaf + right branach from root's child till last non-leaf + all leafs
+  public void boundary() {
+    if(root == null) {
+      return;
+    }
+    // add root first if it's not leaf
+    if(root.left != null || root.right != null) {
+      System.out.print(root.data + " ");
+    }
+    // add left boundary
+    Node cur = root.left;
+    while(cur != null && (cur.left!=null || cur.right != null)) {
+      System.out.print(cur.data + " ");
+      if(cur.left != null) {
+        cur = cur.left;
+      } else {
+        cur = cur.right;
+      }
+    }
+    // add leafs
+    for(int i : grabLeaves(root)) {
+      System.out.print(i + " ");
+    }
+    // add right boundary
+    Stack<Integer> q = new Stack<>();
+    cur = root.right;
+    while(cur != null && (cur.left!=null || cur.right != null)) {
+      q.push(cur.data);
+      if(cur.right != null) {
+        cur = cur.right;
+      } else {
+        cur = cur.left;
+      }
+    }
+    while(!q.isEmpty()) {
+      System.out.print(q.pop() + " ");
+    }
+    System.out.println("");
+  }
+
+  boolean isMirror(Node cur1, Node cur2) {
+    if((cur1 == null && cur2 != null) || (cur1 != null && cur2 == null)) {
+      return false;
+    }
+    if(cur1 == null) {
+      return true;
+    }
+    return cur1.data==cur2.data && isMirror(cur1.right, cur2.left) && isMirror(cur1.left, cur2.right);
+  }
+
+  public void isMirror(BinaryTree t) {
+    System.out.println(isMirror(root, t.root));
+  }
+
+  int diameter(Node cur) {
+    if(cur == null) {
+      return -1;
+    }
+    return Math.max(1 + depthOrHeight(cur.left) + 1 + depthOrHeight(cur.right), Math.max(diameter(cur.left), diameter(cur.right)));
+  }
+
+  public void diameter() {
+    System.out.println(diameter(root));
+  }
+
+  Object[] buildTreeFromPostInOrder(int rPost, int lIn, int rIn, int[] post, Map<Integer,Integer> posInorder) {
+    if(lIn > rIn) {
+      return new Object[]{null,rPost};
+    }
+    int rootData = post[rPost];
+    Node root = new Node(rootData);
+    Object[] res = buildTreeFromPostInOrder(rPost-1,posInorder.get(rootData)+1,rIn,post,posInorder);
+    root.right = (Node)res[0];
+    res = buildTreeFromPostInOrder((int)res[1], lIn, posInorder.get(rootData)-1,post, posInorder);
+    root.left = (Node)res[0];
+    return new Object[]{root, res[1]};
+  }
+
+  public void buildTreeFromPostInOrder(int[] post, int[] in) {
+    Map<Integer, Integer> positionInorder = new HashMap<>();
+    for(int i=0;i<in.length;++i) {
+      positionInorder.put(in[i], i);
+    }
+    root = (Node)buildTreeFromPostInOrder(post.length-1, 0, in.length-1,post,positionInorder)[0];
+    this.preOrder();
+  }
+
+  public void distanceBetweenTwoNodes(List<List<Integer>> xys) {
+    for(List<Integer> xy: xys) {
+      int x = xy.get(0), y = xy.get(1);
+      int lca = LCA(x, y);
+      if(lca == x || lca == y) {
+        System.out.println("dist " + x + " " + y + " " + (int)Math.abs(level[x]-level[y]));
+      } else {
+        System.out.println("dist " + x + " " + y + " " + (level[x]+level[y]-2*level[lca]));
+      }
+    }
+  }
+
+  int[] isBST(Node cur) {
+    if(cur==null) {
+      return new int[]{1, Integer.MIN_VALUE, Integer.MAX_VALUE};
+    }
+    int[] res1 = isBST(cur.left);
+    int[] res2 = isBST(cur.right);
+    boolean res = res1[0]==1 && res2[0]==1 && (res1[1] == Integer.MIN_VALUE || res1[1] < cur.data) && (res2[2] == Integer.MAX_VALUE || cur.data < res2[2]);
+    return new int[]{res?1:0, Math.max(res2[1], cur.data), Math.min(res1[2], cur.data)};
+  }
+
+  // max in left sub-tree < root, min in right sub-tree > root, left subtree is bst, right subtree is bst.
+  public boolean isBST() {
+    return isBST(root)[0]==1;
+  }
+
 }

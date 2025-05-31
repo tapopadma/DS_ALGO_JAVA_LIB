@@ -94,19 +94,20 @@ public class AVLTree{
 					return null;
 				}
 				if(node.left == null) {
-					return node.right;
+					node = node.right;
+				} else if(node.right == null) {
+					node = node.left;
+				} else {
+					Node ptr = node.left;
+					while(ptr.right != null) {
+						ptr = ptr.right;
+					}
+					node.data = ptr.data;
+					node.left = delete(node.left, ptr.data);
 				}
-				if(node.right == null) {
-					return node.left;
-				}
-				Node ptr = node.left;
-				while(ptr.right != null) {
-					ptr = ptr.right;
-				}
-				node.data = ptr.data;
-				node.left = delete(node.left, ptr.data);
 			} else {
 				node.freq = node.freq - 1;
+				return node;
 			}
 		}
 		else if(node.data > value) {
@@ -145,6 +146,10 @@ public class AVLTree{
 		return (node.right == null ? 0 : node.right.height + 1);
 	}
 	
+	// 1. If LL then 1 R rotation.
+	// 2. If LR then 1 L rotation underneath and then 1 R rotation.
+	// 3. If RR then 1 L rotation.
+	// 4. If RL then 1 R rotation underneath and then 1 L rotation.
 	Node balance(Node node) {
 		if(node == null) {
 			return null;
@@ -165,6 +170,7 @@ public class AVLTree{
 				node.right = updateHeight(node.right);
 				node = updateHeight(node);
 			} else {//LR
+				//L
 				Node lrnode = lnode.right;
 				lnode.right = lrnode.left;
 				lrnode.left = lnode;
@@ -172,7 +178,13 @@ public class AVLTree{
 				node.left.left = updateHeight(node.left.left);
 				node.left = updateHeight(node.left);
 				node = updateHeight(node);
-				node = balance(node);	
+				//R
+				lnode = node.left;
+				node.left = lnode.right;
+				lnode.right = node;
+				node = lnode;
+				node.right = updateHeight(node.right);
+				node = updateHeight(node);	
 			}
 		} else {
 			Node rnode = node.right;
@@ -184,7 +196,8 @@ public class AVLTree{
 				node = rnode;
 				node.left = updateHeight(node.left);
 				node = updateHeight(node);
-			} else {
+			} else {//RL
+				//R
 				Node rlnode = rnode.left;
 				rnode.left = rlnode.right;
 				rlnode.right = rnode;
@@ -192,7 +205,13 @@ public class AVLTree{
 				node.right.right = updateHeight(node.right.right);
 				node.right = updateHeight(node.right);
 				node = updateHeight(node);
-				node = balance(node);
+				//L
+				rnode = node.right;
+				node.right = rnode.left;
+				rnode.left = node;
+				node = rnode;
+				node.left = updateHeight(node.left);
+				node = updateHeight(node);
 			}
 		}
 		return node;

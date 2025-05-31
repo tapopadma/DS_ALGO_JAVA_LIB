@@ -1,6 +1,7 @@
 package ds.algo.java.lib.datastrucutres.trees.tests;
 
 import ds.algo.java.lib.datastrucutres.trees.SegmentTree;
+import java.util.Arrays;
 
 class SegmentTreeTest {
 
@@ -11,7 +12,6 @@ class SegmentTreeTest {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("sdfsdf");
 		SegmentTree treeMx = new SegmentTree(new int[] {9, 8, 7, 1, 5, 4, 3, 2, 6}
 		, SegmentTree.Type.MAX);
 		SegmentTree treeMn = new SegmentTree(new int[] {9, 8, 7, 1, 5, 4, 3, 2, 6}
@@ -33,6 +33,20 @@ class SegmentTreeTest {
 		treeSum.update(6, 0);
 		treeSum.update(5, 0);
 		validateLogic(8, treeSum.query(5, 9));
+		SegmentTree sLazy = new SegmentTree();
+		sLazy.lazyPropagation(Arrays.asList(1, 2, 3, 5, 4, 2), 
+			Arrays.asList(Arrays.asList(1, 2, 2),Arrays.asList(3, 5, 1),Arrays.asList(2, 5, 3),Arrays.asList(5, 6, 3)),
+			Arrays.asList(Arrays.asList(1, 6),Arrays.asList(3, 5),Arrays.asList(1, 2),Arrays.asList(5, 6), Arrays.asList(2, 4))
+		);
+		SegmentTree sPersistent = new SegmentTree();
+		sPersistent.persistentSegmentTree(Arrays.asList(1, 2, 1, 4, 7, 9, 2, 3, 3, 8, 6, 5, 2), 
+			Arrays.asList(Arrays.asList(1, 13, 2, 5),Arrays.asList(3, 10, 2, 5),
+				Arrays.asList(1, 13, 1, 5),Arrays.asList(1, 13, 3, 8),Arrays.asList(1, 13, 2, 2),
+		    Arrays.asList(3, 8, 2, 2)));
+		SegmentTree treeMaxSumSubarray = new SegmentTree();
+		treeMaxSumSubarray.maxSubarraySumSegmentTree(Arrays.asList(-2, -3, 4, -1, -2, 1, 5, -3),
+			Arrays.asList(Arrays.asList(1, 10)),
+			Arrays.asList(Arrays.asList(5, 8), Arrays.asList(1, 3), Arrays.asList(3,7)));
+		validateLogic(new SegmentTree().LIS(Arrays.asList(1, 3, 5, 4, 7)), 4);
 	}
-
 }

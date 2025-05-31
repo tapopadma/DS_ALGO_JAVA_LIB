@@ -31,14 +31,93 @@ import ds.algo.java.lib.io.FastInputReader;
  */
 public class KMP implements StandardAlgoSolver{
 
+    // Create hash of strings to match them. If hash matches then that's a potential match, so just
+    // verify that the strings match actually.
+    // The hash function used = (b^(m-1)*c0 + b^(m-2)*c1 + b^(m-3)*c3 + ... + cm_1)%p, for a base b = size of character set = 256,
+    // ci being the character value, m denoting the size of the pattern and p being a prime number.s
+	public void robinKarpPatternMatching(String T, String P) {
+		int b = 256;
+		int p = 1000000007;
+		int n = T.length(), m = P.length();
+		int bm1 = 1;
+		for(int i=1;i<m;++i) {
+			bm1 = (bm1*b)%p;
+		}
+		if(m > n || m == 0) {
+			return;
+		}
+		long tHash = 0, pHash = 0;
+		for(int i=0;i<n;++i) {
+			if(i < m) {
+				pHash = (1L*b*pHash + P.charAt(i))%p;
+			}
+			tHash = (1L*b*(tHash-(i >= m ? 1L*bm1*T.charAt(i-m): 0)) + T.charAt(i))%p;
+			while(tHash < 0) {
+				tHash += p;
+			}
+			if(pHash == tHash && i >= m-1) {
+				boolean match = true;
+				for(int j=0;j<m;++j) {
+					if(T.charAt(i-m+j+1)!=P.charAt(j)) {
+						match = false;break;
+					}
+				}
+				if(match) {
+					System.out.println("matched: " + (i - m + 1));
+				}
+			}
+		}
+	}
+
+	int[] buildZ(String s) {
+		int n = s.length();
+		int[] z = new int[n];
+		int l = 0, r = 0;
+		for(int i=1;i<n;++i) {
+			if(i > r) {
+				l = r = i;
+				while(r < n && s.charAt(r-l) == s.charAt(r)) {
+					++r;
+				}
+				z[i] = r-l;--r;
+			} else {
+				if(i+z[i-l]-1 <r) {
+					z[i] = z[i-l];
+				} else {
+					++r;l=i;
+					while(r < n && s.charAt(r-l) == s.charAt(r)) {
+						++r;
+					}
+					z[i] = r-l;--r;
+				}
+			}
+		}
+		return z;
+	}
+
+	public void zPatternMatching(String T, String P) {
+		int[] z = buildZ(P + T);
+		for(int i=0;i<P.length()+T.length();++i) {
+			if(z[i] >= P.length()) {
+				System.out.println("matched: " + (i - P.length()));
+			}
+		}
+	}
+
 	int [] lps;
+
+    // Build LPS, use it during matching i.e. if there's a mismatch retry with the next character of the longest prefix
+    // that is a suffix. O(n+m).
+	public void kMPPatternMatching(String T, String P) {
+		buildLps(P);
+		matchPattern(T, P);
+	}
 	
 	@Override
 	public void solve(FastInputReader in, PrintWriter out) {
-		String T = in.next();
-		String P = in.next();
-		buildLps(P);
-		matchPattern(T, P);
+		kMPPatternMatching("aabaacaadaabaaba", "aaba");
+		zPatternMatching("aabaacaadaabaaba", "aaba");
+		robinKarpPatternMatching("aabaacaadaabaaba", "aaba");
 	}
 
 	void matchPattern(String T, String P) {

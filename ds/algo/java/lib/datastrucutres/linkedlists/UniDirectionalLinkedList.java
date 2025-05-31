@@ -2,17 +2,17 @@ package ds.algo.java.lib.datastrucutres.linkedlists;
 
 public abstract class UniDirectionalLinkedList {
 
-	protected class Node {
-		int data;
-		Node next;
-		protected Node() {
+	public static class Node {
+		public int data;
+		public Node next;
+		public Node() {
 
 		}
-		protected Node(int data) {
+		public Node(int data) {
 			this.data = data;
 			this.next = null;
 		}
-		protected Node(int data, Node next) {
+		public Node(int data, Node next) {
 			this.data = data;
 			this.next = next;
 		}

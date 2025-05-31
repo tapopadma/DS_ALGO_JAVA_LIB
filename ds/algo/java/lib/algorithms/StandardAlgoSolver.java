@@ -4,10 +4,16 @@ import java.io.PrintWriter;
 
 import ds.algo.java.lib.io.FastInputReader;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public interface StandardAlgoSolver {
 
   void solve(FastInputReader in, PrintWriter out);
+
+  default List<Integer> dynamicList(Integer... args) {
+    return new ArrayList<>(Arrays.asList(args));
+  };
 
   default void validateLogic(int x, int y) {
     if (x != y) {

@@ -18,6 +18,9 @@ public class FenwickTree {
 	int [] T;
 	int n = 0;
 	
+	// How it works ?
+	// Basically this tree helps query prefix sum of i by splitting i into sum of powers of 2 and also by storing sum of powers of 2.
+	// e.g. sum(1..12) = sum(9..12) + sum(1..8)
 	public FenwickTree(int [] a) {
 		n = a.length;
 		T = new int[n + 1];

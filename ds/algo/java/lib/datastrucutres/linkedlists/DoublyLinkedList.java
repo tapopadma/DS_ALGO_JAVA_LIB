@@ -17,10 +17,15 @@ public class DoublyLinkedList<T> {
 		}
 	}
 	
-	Node head;
+	public Node head;
 	int length;
 	
 	public DoublyLinkedList() {
+		head = null;
+		length = 0;
+	}
+
+	public void clear() {
 		head = null;
 		length = 0;
 	}
@@ -68,7 +73,7 @@ public class DoublyLinkedList<T> {
 		}
 		Node tail = getNodeAt(size() - 1);
 		if(L.size() > 0) {
-			tail.next = L.getNodeAt(0);
+			tail.next = L.getNodeAt(0);L.getNodeAt(0).prev = tail;
 		}
 		this.length += L.size();
 	}
@@ -181,6 +186,58 @@ public class DoublyLinkedList<T> {
 	
 	public int size() {
 		return length;
+	}
+
+	// merge 2 sorted doubly linked lists in O(1) space.
+	public DoublyLinkedList merge(DoublyLinkedList l) {
+		Node head1 = head;
+		Node head2 = l.head;
+		if(head1 == null || head2 == null) {
+			return head1 == null ? l : this;
+		}
+		if((int)head1.data > (int)head2.data) {
+			head = head2;
+			head2=head2.next;
+		} else {
+			head1 = head1.next;
+		}
+		Node prev = head;
+		while(head1 != null || head2 != null) {
+			if(head1 == null) {
+				prev.next = head2;head2.prev = prev;
+				prev = head2;
+				head2 = head2.next;
+				continue;
+			}
+			if(head2 == null) {
+				prev.next = head1;head1.prev = prev;
+				prev = head1;
+				head1 = head1.next;
+				continue;
+			}
+			if((int)head1.data < (int)head2.data) {
+				if(prev.next == head1) {
+					prev = head1;
+					head1 = head1.next;
+				} else {
+					prev.next = head1;head1.prev=prev;
+					head1 = head1.next;
+					prev.next.next = head2;head2.prev=prev.next;
+					prev = prev.next;
+				}
+			} else {
+				if(prev.next == head2) {
+					prev = head2;
+					head2 = head2.next;
+				} else {
+					prev.next = head2;head2.prev = prev;
+					head2 = head2.next;
+					prev.next.next = head1;head1.prev=prev.next;
+					prev = prev.next;
+				}
+			}
+		}
+		return this;
 	}
 	
 }
