@@ -1,9 +1,12 @@
+package src.main.java;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -30,7 +33,7 @@ public class ATMMachine{
 				throws InsufficientBalanceException{
 			List<Integer> notes=available.keySet().stream()
 					.sorted((d1,d2)->Integer.valueOf(d2).compareTo(d1))
-					.toList();
+					.collect(Collectors.toList());
 			if(notes.stream().reduce(amount, 
 					(remainder, e)->remainder-e*Math.min(remainder/e, available.get(e)))
 			.equals(0)) {
@@ -101,7 +104,7 @@ public class ATMMachine{
 	}
 	
 	public static void main(String[] args) {
-		JUnitCore.main("ATMMachine");
+		JUnitCore.main("src.main.java.ATMMachine");
 	}
 	
 }

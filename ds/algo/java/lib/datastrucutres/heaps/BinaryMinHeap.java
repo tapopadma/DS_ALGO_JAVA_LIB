@@ -21,17 +21,15 @@ public class BinaryMinHeap {
 	
 	public void push(int val) {
 		a[++tot] = val;
-		int ptr = tot;
-		while(tot/2 >= 1 && a[tot/2] > a[tot]) {
-			int t = a[tot/2];a[tot/2]=a[tot];a[tot] = t;
-			tot /= 2;
+		int i = tot;
+		while(i/2 >= 1 && a[i/2] > a[i]) {
+			int t = a[i/2];a[i/2]=a[i];a[i] = t;
+			i /= 2;
 		}
-		tot = ptr;
 	}
 	
 	public void pop() {
-		a[1] = a[tot--];
-		int i = 1;
+		int i = 1;a[i] = a[tot--];
 		while(i <= tot) {
 			if(i*2 > tot) {
 				break;
@@ -58,7 +56,7 @@ public class BinaryMinHeap {
 	}
 	
 	public int top() {
-		return a[1];
+		return tot > 0 ? a[1] : -1;
 	}
 	
 	public boolean isEmpty() {

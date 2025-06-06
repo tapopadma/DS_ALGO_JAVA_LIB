@@ -110,6 +110,7 @@ public class BinaryTreeTest {
     rootM.addRight(2).addLeft(4).addLeft(7).addRight(8);
     rootM.right.addRight(5);rootM.right.left.addRight(6);
     T.isMirror(Tmirr);
+    T.deserialize(T.serialize());
     T.diameter();
     T.distanceBetweenTwoNodes(Arrays.asList(Arrays.asList(9, 6), Arrays.asList(5, 2), Arrays.asList(1, 4), Arrays.asList(7, 10)));
     T.buildTreeFromPostInOrder(new int[]{4, 5, 2, 3, 1}, new int[]{4, 2, 5, 1, 3});

@@ -7,3 +7,5 @@ libs/
 *.class
 *BUILD
 all_sources.txt
+all_src_sources.txt
+lib

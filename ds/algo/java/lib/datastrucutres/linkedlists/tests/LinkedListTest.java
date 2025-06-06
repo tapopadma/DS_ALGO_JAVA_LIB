@@ -1,5 +1,6 @@
 package ds.algo.java.lib.datastrucutres.linkedlists.tests;
 
+import java.util.Arrays;
 import ds.algo.java.lib.datastrucutres.linkedlists.SinglyLinkedList;
 
 public class LinkedListTest {
@@ -85,5 +86,8 @@ public class LinkedListTest {
     L.clear();
     L.pushBack(1);L.pushBack(2);L.pushBack(3);L.pushBack(4);L.pushBack(5);L.pushBack(6);
     L.reverseInGroupofK(4).print();
+    SinglyLinkedList LRandom = new SinglyLinkedList();
+    LRandom.buildLinkedListWithRandom(Arrays.asList(Arrays.asList(1, 2),Arrays.asList(2, 1), Arrays.asList(3, 5),
+       Arrays.asList(4, 4), Arrays.asList(5, 3))).cloneLinkedListWithRandom().printLinkedListRandom();
   }
 }

@@ -94,7 +94,7 @@ public class VendingMachine{
 							+(extraMap.containsKey(c)
 							?extraMap.get(c):0)));
 			Map<Integer, Integer>subsetMap=new HashMap<>();
-			List<Integer> coinList=coins.stream().toList();
+			List<Integer> coinList=coins.stream().collect(Collectors.toList());
 			if(countCoinToFindSum(
 					0,sum,coinList,coinsMap)>=0) {
 				for(int i=0;i<coins.size();++i) {

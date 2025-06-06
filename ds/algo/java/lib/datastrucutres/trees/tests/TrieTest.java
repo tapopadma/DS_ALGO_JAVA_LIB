@@ -1,6 +1,7 @@
 package ds.algo.java.lib.datastrucutres.trees.tests;
 
 import ds.algo.java.lib.datastrucutres.trees.Trie;
+import ds.algo.java.lib.datastrucutres.trees.HuffmanTree;
 
 public class TrieTest {
 
@@ -39,5 +40,8 @@ public class TrieTest {
     T.delete("bye");
     validateLogic(T.search("bye"), false);
     validateLogic(T.search("empty"), false);
+
+    HuffmanTree tree = new HuffmanTree();
+    tree.build("abbcccdddeeeefffff").printMapping();
   }
 }

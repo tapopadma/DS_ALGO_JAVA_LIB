@@ -868,4 +868,38 @@ public class BinaryTree {
     return isBST(root)[0]==1;
   }
 
+  void serialize(Node cur, List<Integer> list) {
+    if(cur == null) {
+      list.add(-1);
+      return;      
+    }
+    list.add(cur.data);
+    serialize(cur.left, list);
+    serialize(cur.right, list);
+  }
+
+  // add root to list, check its left recursively if present else append -1 to list, check its right recursively if present else append -1 to list.
+  public List<Integer> serialize() {
+    List<Integer> arr = new ArrayList<>();
+    serialize(root, arr);
+    return arr;
+  }
+
+  Node deserialize(int[] idx, List<Integer> list) {
+    if(list.get(idx[0]) == -1) {
+      ++idx[0];
+      return null;
+    }
+    Node cur = new Node(list.get(idx[0]++));
+    cur.left = deserialize(idx, list);
+    cur.right = deserialize(idx, list);
+    return cur;
+  }
+
+  // similar to serialize , opposite pattern.
+  public void deserialize(List<Integer> list) {
+    root = deserialize(new int[]{0}, list);
+    this.preOrder();
+  }
+
 }

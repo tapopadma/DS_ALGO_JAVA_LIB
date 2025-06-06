@@ -1,6 +1,7 @@
 package ds.algo.java.lib.datastrucutres.linkedlists;
 
 import java.util.Stack;
+import java.util.List;
 
 public class SinglyLinkedList extends UniDirectionalLinkedList {
 
@@ -477,4 +478,84 @@ public class SinglyLinkedList extends UniDirectionalLinkedList {
     return this;
   }
 
+  class NodeWithRandom {
+    int data;
+    NodeWithRandom next;
+    NodeWithRandom random;
+    public NodeWithRandom(int data) {
+      this.data = data;
+      this.next = null;
+      this.random = null;
+    }
+  }
+
+  NodeWithRandom headRandom;
+
+  public SinglyLinkedList buildLinkedListWithRandom(List<List<Integer>> list) {
+    if(list.isEmpty()) {
+      return this;
+    }
+    headRandom = new NodeWithRandom(list.get(0).get(0));
+    NodeWithRandom prev = headRandom;
+    for(int i=1;i<list.size();++i) {
+      NodeWithRandom cur = new NodeWithRandom(list.get(i).get(0));
+      prev.next = cur;
+      prev = cur;
+    }
+    NodeWithRandom cur = headRandom;
+    for(int i=0;i<list.size();++i) {
+      NodeWithRandom ptr = headRandom;
+      while(ptr != null) {
+        if(ptr.data == list.get(i).get(1)) {
+          break;
+        }
+        ptr = ptr.next;
+      }
+      cur.random = ptr;
+      cur = cur.next;
+    }
+    return this;
+  }
+
+  // insert cloned nodes as next of a node per each node. Point random pointers to the next of the old nodes. 
+  // Finally get rid of the new nodes. O(n),O(1).
+  public SinglyLinkedList cloneLinkedListWithRandom() {
+    if(headRandom == null) {
+      return null;
+    }
+    NodeWithRandom cur = headRandom;
+    while(cur != null) {
+      NodeWithRandom node = new NodeWithRandom(cur.data);
+      node.next = cur.next;
+      cur.next = node;
+      cur = node.next;
+    }
+    cur = headRandom;
+    while(cur != null) {
+      cur.next.random = cur.random.next;
+      cur = cur.next.next;
+    }
+    NodeWithRandom headRandomCloned = headRandom.next;
+    cur = headRandom;
+    while(cur != null) {
+      NodeWithRandom actualNext = cur.next.next;
+      if(actualNext == null) {
+        break;
+      }
+      cur.next.next = actualNext.next;
+      cur.next = actualNext;
+      cur = cur.next;
+    }
+    headRandom = headRandomCloned;
+    return this;
+  }
+
+  public void printLinkedListRandom() {
+    NodeWithRandom ptr = headRandom;
+    while(ptr != null) {
+      System.out.print(ptr.data + " ");
+      ptr = ptr.next;
+    }
+    System.out.println();
+  }
 }

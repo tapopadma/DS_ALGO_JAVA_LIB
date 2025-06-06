@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -99,7 +100,7 @@ public class Elevator{
 					.stream().filter(r->direction.equals(Direction.UP)
 							?r.floor>=currentFloor:r.floor<=currentFloor)
 					.limit(available)
-					.toList();
+					.collect(Collectors.toList());
 			if(requestsProcessing.isEmpty()
 					&&newRequests.isEmpty()
 					&&requestsPending.values().stream()
