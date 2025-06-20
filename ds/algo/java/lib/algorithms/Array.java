@@ -13,6 +13,7 @@ import java.lang.Math;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
+import java.util.PriorityQueue;
 
 public class Array implements StandardAlgoSolver {
 
@@ -388,6 +389,149 @@ public class Array implements StandardAlgoSolver {
     return ans;
   }
 
+  // greedy: for position i maintain prevMaxCoverage and curMaxCoverage, if prevMaxCoverage ends at i then a jump is necessary so increment jump if 
+  // curMaxCoverage is ahead else return -1, Also update prevMaxCoverage to cur one. O(n)
+  public int minJumpsToReachEndOfArray(int[] a) {
+    int prevMaxCoverage = 0;// The maximum reachability before i.
+    int curMaxCoverage = 0;// The maximum reachability i onwards.
+    int minJump = 0;
+    for(int i=0;i<a.length;++i) {
+      curMaxCoverage = Math.max(curMaxCoverage, i+a[i]);
+      if(curMaxCoverage >= a.length-1) {
+        return minJump+1;
+      }
+      if(prevMaxCoverage==i) { // no more jump possibility from preceeding points, so a jump from current point is the only way.
+        if(curMaxCoverage == i) { // no more jump possibility from current point either.
+          return -1;
+        } else {
+          prevMaxCoverage = curMaxCoverage;
+          ++minJump;
+        }
+      }
+    }
+    return -1;
+  }
+
+  int findLISInsertionPoint(List<Integer> list, int key) {
+    if(list.isEmpty() || list.get(list.size()-1) < key) {
+      return list.size();
+    }
+    int lo = 0, hi = list.size() - 1, mid = 0;
+    while(lo < hi) {
+      mid = (lo+hi)/2;
+      if(list.get(mid) >= key) {
+        hi=mid;
+      } else {
+        lo = mid + 1;
+      }
+    }
+    return lo;
+  }
+
+  // Greedy: At i maintain sorted subsequence list such that if a[i] > last element in it just append, else just find insert point j such that a[i] <= l[j],
+  // and just replace l[j] with a[i] to enhance any chance of the list being appendable without decreasing its length at all. This can also print lis
+  // with parent[] array. O(nlogn)
+  //
+  // alternative is to use dp+RMQ per i but that could need encoding big numbers and extra space for segment tree.
+  public int longestIncreasingSubsequence(int[] a) {
+    List<Integer> list = new ArrayList<>();
+    for(int val: a) {
+      int idx = findLISInsertionPoint(list, val);
+      if(idx == list.size()) {
+        list.add(val);
+      } else {
+        list.set(idx, val);
+      }
+    }
+    return list.size();
+  }
+
+  // dp: place 1 in one of the (n-1) places j, if j comes to place 1 then dp[n-2] else still dp[n-1] to derange in the places except first place.
+  // dp[n] = (n-1)*(dp[n-2]+dp[n-1])
+  public int countDerangements(int n) {
+    int[] dp = new int[n + 1];
+    dp[0]=1;dp[1]=0;
+    for(int i=2;i<=n;++i) {
+      dp[i] = (i-1)*(dp[i-2]+dp[i-1]);
+    }
+    return dp[n];
+  }
+
+  // max non-overlapping interval: sort by end time and validate. O(nlogn)
+  public int maxActivitySelection(int[][] a) {
+    Arrays.sort(a,(a1,a2)->Integer.compare(a1[1], a2[1]));
+    int maxActivity = 0;
+    int allowedStart = 0;
+    for(int i=0;i<a.length;++i) {
+      if(a[i][0] <= allowedStart) {
+        continue;
+      }
+      allowedStart = a[i][1];
+      ++maxActivity;
+    }
+    return maxActivity;
+  }
+
+  // schedule the jobs (each takes 1 unit time to finish) within their deadline to achieve max profit of running the job.
+  //
+  // By the time t we must choose top t highest profit jobs with deadline <= t. Process in sorted deadline to not miss out
+  // a job to be run just because their was higher profit job that could be executed.
+  public int jobSequenceSelection(int[] deadline, int[] profit) {
+    int[][] a = new int[deadline.length][2];
+    for(int i=0;i<deadline.length;++i){
+      a[i][0] = deadline[i];a[i][1] = profit[i];
+    }
+    PriorityQueue<Integer> jobsTobeExecuted = new PriorityQueue<>();//profit
+    Arrays.sort(a, (a1,a2)->Integer.compare(a1[0],a2[0]));
+    for(int i=0;i<a.length;++i) {
+      int t = a[i][0];
+      if(jobsTobeExecuted.size() < t) {
+        jobsTobeExecuted.add(a[i][1]);
+      } else {
+        if(jobsTobeExecuted.peek() < a[i][1]) {// assume deadline[] has only positive integers.
+          jobsTobeExecuted.poll();
+          jobsTobeExecuted.add(a[i][1]);
+        }
+      }
+    }
+    int maxTotalProfit = 0;
+    for(int p: jobsTobeExecuted) {
+      maxTotalProfit += p;
+    }
+    return maxTotalProfit;
+  }
+
+  public void mergeIntervals(int[][] a) {
+    Arrays.sort(a, (a1,a2)->Integer.compare(a1[0],a2[0]));
+    int lastEnd = -1;
+    for(int i=0;i<a.length;++i) {
+      if(a[i][0] > lastEnd) {
+        if(lastEnd >= 0) {
+          System.out.println(lastEnd);
+        }
+        lastEnd = a[i][1];
+        System.out.print(a[i][0] + " ");
+      } else {
+        lastEnd = Math.max(lastEnd, a[i][1]);
+      }
+    }
+    System.out.println(lastEnd);
+  }
+
+  public int maxIntervalOverlaps(int[][] a) {
+    Arrays.sort(a, (a1,a2)->Integer.compare(a1[0],a2[0]));
+    PriorityQueue<Integer> q = new PriorityQueue<>((i,j)->Integer.compare(a[i][1],a[j][1]));
+    int maxOverlap = 0;
+    for(int i=0;i<a.length;++i) {
+      while(!q.isEmpty() && a[q.peek()][1] < a[i][0]) {
+        q.poll();
+      }
+      q.add(i);
+      maxOverlap = Math.max(maxOverlap, q.size());
+    }
+    return maxOverlap;
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(
@@ -408,5 +552,24 @@ public class Array implements StandardAlgoSolver {
     checkNonRepeatingElementExistenceInSubarray(Arrays.asList(1,2,1,3,2,3,4,4,2,3,5,6,2,1,8,9,2),
       Arrays.asList(dynamicList(1, 6),dynamicList(7,8), dynamicList(6, 10), dynamicList(1, 17)));
     validateLogic(minSwapsToSortArray(Arrays.asList(10, 19, 6, 3, 5)), 2);
+    validateLogic(3, minJumpsToReachEndOfArray(new int[]{1, 3, 5, 8, 9, 2, 6, 7, 6, 8, 9}));
+    validateLogic(2, minJumpsToReachEndOfArray(new int[]{1, 4, 3, 2, 6, 7}));
+    validateLogic(-1, minJumpsToReachEndOfArray(new int[]{0,10,20}));
+    validateLogic(3,longestIncreasingSubsequence(new int[]{3, 10, 2, 1, 20}));
+    validateLogic(4,longestIncreasingSubsequence(new int[]{50, 3, 10, 7, 40, 80}));
+    validateLogic(1,longestIncreasingSubsequence(new int[]{3, 2}));
+    validateLogic(9, countDerangements(4));
+    validateLogic(4, maxActivitySelection(new int[][]{new int[]{1,2},new int[]{3,4},new int[]{0,6},new int[]{5,7},new int[]{8,9},new int[]{5,9}}));
+    validateLogic(1, maxActivitySelection(new int[][]{new int[]{10,20},new int[]{12,25},new int[]{20,30}}));
+    validateLogic(127, jobSequenceSelection(new int[]{2, 1, 2, 1, 1},new int[]{100, 19, 27, 25,15}));
+    mergeIntervals(new int[][]{new int[]{7, 8}, new int[]{1, 5}, new int[]{2, 4}, new int[]{4, 6}});
+    validateLogic(3, maxIntervalOverlaps(new int[][]{
+      {900, 910},
+      {940, 1200},
+      {950, 1120},
+      {1100, 1130},
+      {1500, 1900},
+      {1800, 2000}}));
+    validateLogic(1, maxIntervalOverlaps(new int[][]{{1,3},{5,7}}));
   }
 }

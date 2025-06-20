@@ -815,6 +815,8 @@ public class BinaryTree {
     return Math.max(1 + depthOrHeight(cur.left) + 1 + depthOrHeight(cur.right), Math.max(diameter(cur.left), diameter(cur.right)));
   }
 
+  // simple recursive checking O(n),O(n).
+  // alternate: start bfs from root, maintain dist[], find farthest node. start new bfs from farthest to find new farthest. dist of latter is diameter.
   public void diameter() {
     System.out.println(diameter(root));
   }
