@@ -144,7 +144,7 @@ public class VendingMachine{
 	}
 	
 	Server server=new Server(
-			new HashMap<>() {{
+			new HashMap<CoffeeType, Integer>() {{
 				put(CoffeeType.BLACK,100);
 				put(CoffeeType.CAPUCCINO,200);
 				put(CoffeeType.KOPI,40);

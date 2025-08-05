@@ -532,6 +532,37 @@ public class Array implements StandardAlgoSolver {
     return maxOverlap;
   }
 
+  // validate paranthesis string with * characters replacable with empty or ( or ).
+  // using stack1 to track ( positions and stack2 to track * positions, for every ) popping from stack1 before stack2.
+  // after all ) exhausted, try to pop(if valid) from stack2 until stack1 isn't empty. O(n) O(n)
+  public boolean isValidParanthesisWithWildCard(String s) {
+    int n = s.length();
+    Stack<Integer> q1 = new Stack<>();
+    Stack<Integer> q2 = new Stack<>();
+    for(int i=0;i<n;++i){
+      char c = s.charAt(i);
+      if(c=='(') {
+        q1.add(i);
+      } else if(c=='*') {
+        q2.add(i);
+      } else {
+        if(!q1.isEmpty()) {
+          q1.pop();
+        } else if(!q2.isEmpty()) {
+          q2.pop();
+        } else {
+          return false;
+        }
+      }
+    }
+    while(!q1.isEmpty()) {
+      int i = q1.pop();
+      if(q2.isEmpty() || q2.peek() < i)return false;
+      q2.pop();
+    }
+    return true;
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(
@@ -571,5 +602,6 @@ public class Array implements StandardAlgoSolver {
       {1500, 1900},
       {1800, 2000}}));
     validateLogic(1, maxIntervalOverlaps(new int[][]{{1,3},{5,7}}));
+    validateLogic(true,isValidParanthesisWithWildCard("((((()(()()()*()(((((*)()*(**(())))))(())()())(((())())())))))))(((((())*)))()))(()((*()*(*)))(*)()"));
   }
 }
