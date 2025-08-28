@@ -563,6 +563,26 @@ public class Array implements StandardAlgoSolver {
     return true;
   }
 
+  // find the max profit in SE where any number of trading allowed but not more than 1 stock can be hold on a given day.
+  // Straightforward way is to use dp[n][2] but O(1) space solution is to find local minima followed by find local maxima.
+  // O(n) O(1).
+  public int maxProfitUnboundedStockExchange(int[] prices) {
+    int maxProfit = 0;
+    int l = 0, r = 0, n = prices.length;
+    while(l < n && r < n) {
+      while(l+1 < n && prices[l+1]<=prices[l]) {
+        ++l;
+      }
+      r=l;
+      while(r+1 < n && prices[r+1]>=prices[r]) {
+        ++r;
+      }
+      maxProfit += prices[r]-prices[l];
+      l=r+1;r=l;
+    }
+    return maxProfit;
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(
@@ -603,5 +623,6 @@ public class Array implements StandardAlgoSolver {
       {1800, 2000}}));
     validateLogic(1, maxIntervalOverlaps(new int[][]{{1,3},{5,7}}));
     validateLogic(true,isValidParanthesisWithWildCard("((((()(()()()*()(((((*)()*(**(())))))(())()())(((())())())))))))(((((())*)))()))(()((*()*(*)))(*)()"));
+    validateLogic(865, maxProfitUnboundedStockExchange(new int[]{100, 180, 260, 310, 40, 535, 695}));
   }
 }
