@@ -583,6 +583,52 @@ public class Array implements StandardAlgoSolver {
     return maxProfit;
   }
 
+  // Essentially make a-b to a zero matrix with allowed operations (i.e. either increment/decrement a row/column per operation).
+  // Perform all row operations to make 1st column as 0. Any original column operation would have turned residue in the remaining
+  // columns now perform all column operations and verify the matrix became 0 or not. O(n*m) O(1).
+  public boolean makeMatrixIdentical(int[][] a, int[][] b) {
+    int n = a.length, m = a[0].length;
+    for(int i=0;i<n;++i){
+      for(int j=0;j<m;++j){
+        a[i][j] -= b[i][j];
+      }
+    }
+    for(int i=0;i<n;++i){
+      int k = a[i][0];
+      for(int j=0;j<m;++j) {
+        a[i][j]-=k;
+      }
+    }
+    for(int j=1;j<m;++j){
+      int k = a[0][j];
+      for(int i=0;i<n;++i) {
+        a[i][j]-=k;
+        if(a[i][j]!=0) return false;
+      }
+    }
+    return true;
+  }
+
+  int f(int i, int j, int[][] a, int[][] dp) {
+    if(dp[i][j]!=-1)return dp[i][j];
+    if(j==a[0].length-1&&i==a.length-1) {
+      return dp[i][j]=Math.max(1, 1-a[i][j]);
+    }
+    int l = j==a[0].length-1?Integer.MAX_VALUE:f(i, j + 1, a, dp);
+    int r = i==a.length-1?Integer.MAX_VALUE:f(i + 1, j, a, dp);
+    return dp[i][j]=Math.max(1, Math.min(l,r)-a[i][j]);
+  }
+
+  // To find initial score to walk from (0,0) to (n-1,m-1) with R & D directions only and without getting the sum of visited cell <=0 anywhere from entry to exit,
+  // dp can be implemented i.e. f(i,j) = min initial score needed to reach (n-1,m-1) then f(i,j) = Math.max(Math.min(f(i,j+1),f(i+1,j))-a[i][j],1).
+  // O(nm)O(nm)
+  public int minInitialScoreToWalkGrid(int[][] a) {
+    int n = a.length, m = a[0].length;
+    int[][] dp = new int[n][m];
+    for(int i=0;i<n;++i)Arrays.fill(dp[i],-1);
+    return f(0,0,a,dp);
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(
@@ -624,5 +670,9 @@ public class Array implements StandardAlgoSolver {
     validateLogic(1, maxIntervalOverlaps(new int[][]{{1,3},{5,7}}));
     validateLogic(true,isValidParanthesisWithWildCard("((((()(()()()*()(((((*)()*(**(())))))(())()())(((())())())))))))(((((())*)))()))(()((*()*(*)))(*)()"));
     validateLogic(865, maxProfitUnboundedStockExchange(new int[]{100, 180, 260, 310, 40, 535, 695}));
+    validateLogic(true, makeMatrixIdentical(new int[][]{{1,1},{1,1}},new int[][]{{1,2},{3,4}}));
+    validateLogic(7, minInitialScoreToWalkGrid(new int[][]{ { -2, -3, 3 },
+                           { -5, -10, 1 },
+                           { 10, 30, -5 } }));
   }
 }
