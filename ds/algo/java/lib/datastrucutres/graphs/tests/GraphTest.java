@@ -224,6 +224,10 @@ public class GraphTest {
         .buildGraph(12, new int[][]{new int[]{1, 8},new int[]{1, 9}, new int[]{3, 7}, new int[]{3, 10}, new int[]{4, 9}, new int[]{5, 9},
                         new int[]{5, 10}, new int[]{6, 12}}, true)
         .maxBipartiteMatching());
+    validate(5, new Graph()
+        .buildGraph(12, new int[][]{new int[]{1, 8},new int[]{1, 9}, new int[]{3, 7}, new int[]{3, 10}, new int[]{4, 9}, new int[]{5, 9},
+                        new int[]{5, 10}, new int[]{6, 12}}, true)
+        .maxBipartiteMatchingHitNTrial());
     validate(80, new Graph()
         .buildWeightedGraph(4, new int[][]{new int[]{1, 2, 10},new int[]{1, 3, 15},new int[]{1, 4, 20},
             new int[]{2, 3, 35},new int[]{2, 4, 25},new int[]{3, 4, 30}})

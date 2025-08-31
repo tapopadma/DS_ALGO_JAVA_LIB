@@ -1341,6 +1341,32 @@ public class Graph {
     return maxFlowFordFulkerson(1, n);
   }
 
+  boolean maxBipartiteMatchingHitNTrial(int x, int[] match) {
+    for(int y: graph.get(x)) {
+      if(!isInStack[y]) {
+        isInStack[y] = true;
+        if(match[y]==-1 || maxBipartiteMatchingHitNTrial(match[y],match)) {
+          match[y]=x;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Alternative to maxflow approach is to apply hit and trial i.e. For each node check if y can be a match for x by recursively checking every unvisited edges.
+  // If y isn't assigned any x1 then x can simply be assigned , else if x1 can be assigned to something unvisited then x can be assigned to y based on feasibility.
+  // O(n*m)O(m).
+  public int maxBipartiteMatchingHitNTrial() {
+    int[] match = new int[n + 1];Arrays.fill(match, -1);
+    int matchCount = 0;
+    for(int i=1;i<=n;++i) {
+      isInStack = new boolean[n + 1];
+      if(maxBipartiteMatchingHitNTrial(i,match))++matchCount;
+    }
+    return matchCount;
+  }
+
   int bitCount(int mask) {
     int cnt = 0;
     while(mask > 0) {
