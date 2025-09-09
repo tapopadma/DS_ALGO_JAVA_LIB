@@ -122,6 +122,10 @@ public class SinglyLinkedList extends UniDirectionalLinkedList {
     return len;
   }
 
+  // an O(1) space alternate of hashing approach would be: say after a length cycle of length c exists such that a+c=n, 
+  // if we start a fast and slow pointer and they meet at a distance b after a then it can be shown that 2*(a+kSlow*c+b)=a+b+kFast*c
+  // i.e. the net distance covered by fast is twice that of slow. So a+b=k*c i.e. a=k*c-b. This means if position of fast is reset to 
+  // head and both start moving 1 step each then both will meet at end of a only.
   public int getLoopStartIndex() {
     return length - getLoopLength();
   }
