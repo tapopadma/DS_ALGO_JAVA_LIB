@@ -327,21 +327,19 @@ public class Graph {
    */
   public int[] prim() {
     dist = new int[n + 1];
-    for (int i = 1; i <= n; ++i) {
-      dist[i] = INF;
-    }
+    visited = new boolean[n + 1];
+    Arrays.fill(dist, INF);Arrays.fill(visited, false);
     dist[1] = 0;
     TreeSet<Integer> Q =
         new TreeSet<>(
-            (i, j) ->
-                (dist[i] != dist[j])
-                    ? Integer.valueOf(dist[i]).compareTo(Integer.valueOf(dist[j]))
-                    : Integer.valueOf(i).compareTo(Integer.valueOf(j)));
+            (i, j) -> dist[i] != dist[j]
+                    ? Integer.compare(dist[i],dist[j])
+                    : Integer.compare(i,j));
     Q.add(1);
     while (!Q.isEmpty()) {
-      int node = Q.pollFirst();
+      int node = Q.pollFirst();visited[node]=true;
       for (Edge e : G.get(node)) {
-        if (dist[e.node] > e.weight) {
+        if (!visited[e.node] && dist[e.node] > e.weight) {
           Q.remove(e.node);
           dist[e.node] = e.weight;
           Q.add(e.node);
@@ -659,41 +657,49 @@ public class Graph {
     return isReachable(graph, start, end, visited);
   }
 
-  // Since there's a upper limit on the path length, we just use plain bfs till the specified path
-  // length.
+  // can alternatively be done in bellmanford style using just the edges (safer).
+  int findMaxCostPathWithMaxKNodes(int x, int i, int end, int k, List<List<Edge>> g, int[][] dp) {
+    if(dp[x][i]!=-1)return dp[x][i];
+    if(i==k) return dp[x][i]=x==end?0:-INF;
+    int max = 0;
+    for(Edge e: g.get(x)) {
+      int y = e.node;
+      int w = e.weight;
+      max = Math.max(max, w + findMaxCostPathWithMaxKNodes(y,i+1,end,k,g,dp));
+    }
+    return dp[x][i]=max;
+  }
+
+  // Weighted directed graph.
+  // Since there can be cycles (unlike DAG where it's toposort based dp), bellman ford style dp is needed. 
+  // dfs based dp would also work given duplicate nodes are allowed on the path.
   int findMaxCostPathWithMaxKNodes(
-      List<List<Edge>> graph, int start, int end, int k, int[] dist, int[] pathLength) {
-    int maxCost = -1; // max cost path if unreachable.
-    dist[start] = 0;
-    pathLength[start] = 1;
-    Queue<Integer> q = new ArrayDeque<>();
-    q.add(start);
-    while (!q.isEmpty()) {
-      int i = q.poll();
-      if (i == end) {
-        maxCost = Math.max(maxCost, dist[i]);
-      }
-      for (Edge e : graph.get(i)) {
-        if (dist[i] + e.weight > dist[e.node] && pathLength[i] < k) {
-          q.add(e.node);
-          dist[e.node] = dist[i] + e.weight;
-          pathLength[e.node] = pathLength[i] + 1;
-        }
+      List<List<Edge>> graph, int start, int end, int k) {
+    int[][] dp = new int[10000][100];
+    for(int i=0;i<10000;++i)Arrays.fill(dp[i],-1);
+    return findMaxCostPathWithMaxKNodes(start, 1, end, k, graph, dp);
+  }
+
+  int maxCostPathWithMaxKNodesBellMF(int nodeCount, int[][] edges, int start, int end, int k) {
+    int n = nodeCount;
+    int[][] d = new int[n+1][k];for(int i=1;i<=n;++i) Arrays.fill(d[i], -INF);
+    d[start][0] = 0;
+    for(int j=1;j<k;++j) {
+      for(int[] xy: edges) {
+        int x = xy[0], y = xy[1], w = xy[2];
+        if(d[x][j-1]!=-INF && d[x][j-1]+w > d[y][j])d[y][j]=d[x][j-1]+w;
       }
     }
-    return maxCost;
+    int max = 0;
+    for(int i=0;i<k;++i)max=Math.max(max, d[end][i]);
+    return max;
   }
 
   // max cost path in a weighted digraph with max k nodes for positive edges.
   public int maxCostPathWithMaxKNodes(int nodeCount, int[][] edges, int start, int end, int k) {
     graphW = new ArrayList<>();
-    int[] dist = new int[nodeCount + 1];
-    int[] pathLength = new int[nodeCount + 1];
-    for (int i = 1; i <= nodeCount; ++i) {
-      dist[i] = -INF;
-    }
     buildWeightedGraph(nodeCount, edges, true);
-    return findMaxCostPathWithMaxKNodes(graphW, start, end, k, dist, pathLength);
+    return findMaxCostPathWithMaxKNodes(graphW, start, end, k);
   }
 
   void toposort(int x, Stack<Integer> q) {

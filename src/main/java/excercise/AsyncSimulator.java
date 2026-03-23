@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 // threads, threadpool, threadlocal, future, concurrentDS, synchronised, volatile, fork join, wait notify, lock, atomicDs.
 public class AsyncSimulator {
 
+	//todo: blockingqueue(bounded), semaphore
+
     void simulateThreads() {
 		int[] balances = new int[]{1000, 0};
 		List<Thread> transactions = new ArrayList<>();

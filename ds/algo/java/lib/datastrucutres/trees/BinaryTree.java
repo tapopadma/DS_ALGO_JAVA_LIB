@@ -697,46 +697,25 @@ public class BinaryTree {
     return maxPathSumBetweenLeaves(root)[1];
   }
 
-  List<List<Integer>> prependToPaths(int e, List<List<Integer>> paths) {
-    for(List<Integer> path: paths) {
-      path.add(0, e);
-    }
-    return paths;
+  int allDownwardPathsOfSumK(Node cur, int sum, Map<Integer, Integer> map, int k) {
+      if(cur==null)return 0;
+      sum += cur.data;
+      int count = 0;
+      if(sum == k)count++;
+      count += map.getOrDefault(sum-k,0);
+      int c = map.getOrDefault(sum,0);++c;
+      map.put(sum, c);
+      count += f(cur.left, sum, map, k);
+      count += f(cur.right, sum, map, k);
+      c = map.getOrDefault(sum,0);--c;
+      if(c>=0)map.put(sum, c);
+      return count;
   }
 
-  List<List<Integer>> allDownwardPathsOfSumKStartingFromNode(Node cur, int k) {
-    List<List<Integer>> ret = new ArrayList<>();
-    if(cur == null) {
-      return ret;
-    }
-    if(cur.data == k){
-      ret.add(new ArrayList<>(List.of(cur.data)));
-    }
-    ret.addAll(prependToPaths(cur.data, allDownwardPathsOfSumKStartingFromNode(cur.left, k-cur.data)));
-    ret.addAll(prependToPaths(cur.data, allDownwardPathsOfSumKStartingFromNode(cur.right, k-cur.data)));
-    return ret;
-  }
-
-  List<List<Integer>> allDownwardPathsOfSumK(Node cur, int k) {
-    List<List<Integer>> ret = new ArrayList<>();
-    if(cur == null) {
-      return ret;
-    }
-    ret.addAll(allDownwardPathsOfSumKStartingFromNode(cur, k));
-    ret.addAll(allDownwardPathsOfSumK(cur.left, k));
-    ret.addAll(allDownwardPathsOfSumK(cur.right, k));
-    return ret;
-  }
-
-  // for each root grab all paths starting from it and then recursively grab the same for all its descendants.
-  public void allDownwardPathsOfSumK(int k) {
-    List<List<Integer>> l = allDownwardPathsOfSumK(root, k);
-    for(List<Integer> path: l) {
-      for(int i: path) {
-        System.out.print(i + "->");
-      }
-      System.out.println("");
-    }
+  // for each node, count all possible path from its ancestors that sum to k. O(n).
+  public int allDownwardPathsOfSumK(int k) {
+    Map<Integer, Integer> map = new HashMap<>();
+    return allDownwardPathsOfSumK(root, 0, map, k);
   }
 
   // there's a O(1) space approach using morris traversal that will track all leaves in left subtree before right. 

@@ -32,64 +32,39 @@ public class Main {
  
 	static class Task {
 
-		void rec(int i, Deque<Integer> a, List<List<Integer>> p, boolean[] v, int n) {
-			if(v[i])return;
-			v[i]=true;
-			a.addLast(i);
-			if(a.size()==n) {
-			 	List<Integer> p1 = new ArrayList<>();
-			 	for(int j:a)p1.add(j);
-			 	p.add(p1);
-			} else {
-				for(int j=0;j<n;++j){
-					rec(j,a,p,v,n);
-				}
-			}
-			v[i]=false;
-			a.pollLast();
-		}
-
 		public void solve(InputReader in, PrintWriter out) throws Exception {
-			int n= in.nextInt();
-			int m = in.nextInt();
-			boolean[][] a = new boolean[n][n];
-			int[][] e = new int[m][2];
-			for(int i=0;i<m;++i){
-				int u = in.nextInt()-1;
-				int v = in.nextInt()-1;
-				if(u > v){
-					int t = u;u=v;v=t;
+			int t = in.nextInt();
+			while(t-->0){
+				int n = in.nextInt(), m = in.nextInt();
+				String s = in.nextLine();
+				Set<Integer> b = new HashSet<>();
+				while(m-->0) {
+					b.add(in.nextInt());
 				}
-				a[u][v]=a[v][u]=true;
-				e[i][0]=u;e[i][1]=v;
-			}
-			List<List<Integer>> p = new ArrayList<>();
-			boolean[] vis = new boolean[n];
-			for(int i=0;i<n;++i) {
-				rec(i,new ArrayDeque<>(),p,vis, n);
-			}
-			int ans = m+n+1;
-			for(List<Integer> ar: p) {
-				int cost = 0;
-				int[] next = new int[n];
-				for(int i=0;i<n;++i){
-					int u = ar.get(i);
-					int v = ar.get((i+1)%n);
-					next[u]=v;
-				}
-				for(int i=0;i<m;++i) {
-					if(next[e[i][0]] != e[i][1] && next[e[i][1]] != e[i][0]) {
-						++cost;
+				List<Integer> black = new ArrayList<>();
+				int v = 1;
+				if(b.contains(v))black.add(1);b.remove(1);
+				for(int i=0;i<n;++i) {
+					char c = s.charAt(i);
+					if(c=='B') {
+						while(b.contains(v+1)) {
+							black.add(v+1);v++;b.remove(v);
+						}
+						black.add(++v);
+						while(b.contains(v+1)) {
+							black.add(v+1);v++;b.remove(v);
+						}
+						++v;
+					} else {
+						v++;
+						black.add(v);b.remove(v);
 					}
 				}
-				for(int i=0;i<n;++i){
-					int u = ar.get(i);
-					int v = ar.get((i+1)%n);
-					if(!a[u][v])++cost;
-				}
-				ans = Math.min(ans, cost);
+				for(int bl: b)black.add(bl);
+				out.println(black.size());
+				black.stream().sorted().forEach(bl->out.print(bl + " "));
+				out.println();
 			}
-			out.println(ans);
 		}
 	}
 	
