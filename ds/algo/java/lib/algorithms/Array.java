@@ -629,6 +629,39 @@ public class Array implements StandardAlgoSolver {
     return f(0,0,a,dp);
   }
 
+  // Normal DP works, but the optimisation to O(n*k*logn) from O(n*n*k) is hidden in its bottom up impl.
+  // These kinda dps are bit unique.
+  public int minConsecutiveAbsDiffSumInKLenSubSequence(int[] a, int k) {
+    // normally f(n,k)=Math.min(|a[n-1]-a[j]| + f(j,k-1), f(n-1,k)) for j in [0,n-1]
+    int n = a.length;
+    int INF = Integer.MAX_VALUE;
+    int[][] dp = new int[n+1][k+1];
+    for(int i=0;i<=n;++i){
+      for(int j=i+1;j<=k;++j) {
+        dp[i][j]=INF;
+      }
+    }
+    for(int i=0;i<=n;++i) {
+      dp[i][0]=dp[i][1]=0;
+    }
+    for(int j=2;j<=k;++j) {
+      int[] neg = new int[n + 1];
+      int[] pos = new int[n + 1];
+      for(int i=0;i<=n;++i) {
+        neg[i] = Math.min(i==0?INF:neg[i - 1], dp[i][j-1] - a[i]);
+      }
+      for(int i=n-1;i>=0;--i) {
+        pos[i] = Math.min(i==n-1?INF:pos[i + 1], dp[i][j-1] + a[i]);
+      }
+      for(int i=j;i<=n;++i) {
+        dp[i][j]=INF;
+        // for(int x=0;x<i;++x)dp[i][j]=Math.min(dp[i][j],dp[x][j-1]+(int)(Math.abs(a[x]-a[i-1])));
+        
+        // above can be replaced with O(logn) segment tree operations.
+      }
+    }
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(
