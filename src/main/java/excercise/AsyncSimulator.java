@@ -40,6 +40,8 @@ public class AsyncSimulator {
 
 		for(int i=0;i<100;++i) {
 			transactions.get(i).start();
+		}
+		for(int i=0;i<100;++i) {
 			try {
 				transactions.get(i).join();// join will ensure the current thread waits for this thread to complete.
 			} catch(InterruptedException e){
@@ -229,7 +231,7 @@ public class AsyncSimulator {
 	private static final Object lock = new Object();
     private static String message = null;
 
-	void simulateWaitNotify() {
+	void simulateWaitNotify() {// an interaction among threads over an object lock.
         // Consumer Thread
         Thread consumer = new Thread(() -> {
             synchronized (lock) {
