@@ -14,79 +14,93 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-
-enum VehicleType {
-	TWOWHEELER(1),FOURWHEELER(2),LARGE(3);
-	int size;
-	VehicleType(int s) {
-		size=s;
-	}
-}
-
-class Vehicle {
-	int id;
-	VehicleType type;
-	Vehicle(int i, VehicleType t) {
-		id=i;type=t;
-	}
+enum VehicleSize {
+	SMALL,MEDIUM,LARGE;
 }
 
 class Spot {
 	int id;
-	VehicleType type;
-	Spot(int i, VehicleType t) {
-		id=i;type=t;
+	VehicleSize sizeCompatible;
+	Spot(int i, VehicleSize v) {
+		id=i;sizeCompatible=v;
 	}
 }
 
 class Ticket {
+	static final Map<VehicleSize, Double> RATES = Map.of(
+			VehicleSize.SMALL, 0.003,
+			VehicleSize.MEDIUM, 0.01,
+			VehicleSize.LARGE, 0.05);
 	int id;
-	Vehicle vehicle;
+	int vehicle;
 	Spot spot;
-	int startTime;
-	Ticket(int i, Vehicle v, Spot s, int st) {
-		id=i;vehicle=v;spot=s;startTime=st;
+	int parkedAt;
+	double rate;
+	boolean closed;
+	Ticket(int i, int vehicle, Spot spot, int now) {
+		id=i;
+		this.vehicle=vehicle;
+		this.spot=spot;
+		this.parkedAt=now;
+		this.rate=RATES.get(spot.sizeCompatible);
+		closed=false;
+	}
+	public int estimateFare() {
+		int now = (int)(System.currentTimeMillis()/1000L);
+		int elapsed = now - parkedAt;
+		double total = 1.0*elapsed * rate;
+		return (int)total;
 	}
 }
 
-class ParkingLot {
-	
-	Map<VehicleType, Queue<Spot>> freeSpots;
-	Map<Integer, Ticket> tickets;
+class ParkingLotManager {
+	ConcurrentHashMap<VehicleSize, Queue<Spot>> spots;
+	ConcurrentHashMap<Integer, Ticket> tickets;
 	int TICKET_ID;
-	
-	ParkingLot() {
-		freeSpots = new HashMap<>();
-		freeSpots.putIfAbsent(VehicleType.TWOWHEELER, new ArrayDeque<Spot>());
-		freeSpots.putIfAbsent(VehicleType.FOURWHEELER, new ArrayDeque<Spot>());
-		freeSpots.putIfAbsent(VehicleType.LARGE, new ArrayDeque<Spot>());
-		tickets = new HashMap<Integer, Ticket>();
+	public ParkingLotManager() {
 		TICKET_ID=0;
+		spots = new ConcurrentHashMap<>();
+		spots.putIfAbsent(VehicleSize.SMALL, new ArrayDeque<Spot>());
+		spots.putIfAbsent(VehicleSize.MEDIUM, new ArrayDeque<Spot>());
+		spots.putIfAbsent(VehicleSize.LARGE, new ArrayDeque<Spot>());
+		tickets = new ConcurrentHashMap<>();
+	}
+	void addSpot(int spotId, VehicleSize size) {
+		spots.compute(size, (k,v)-> {
+			v.add(new Spot(spotId, size));
+			return v;
+		});
 	}
 	
-	void addSpot(int id, VehicleType type) {
-		freeSpots.get(type).add(new Spot(id,type));
+	public Ticket checkIn(VehicleSize size, int vehicleId) {
+		Ticket[] result = new Ticket[] {null};
+		spots.compute(size, (k,v)-> {
+			if(v.isEmpty()) {
+				throw new RuntimeException("Parking Lot Full");
+			} else {
+				Spot spot = v.poll();
+				int now = (int)(System.currentTimeMillis()/1000L);
+				Ticket ticket = new Ticket(++TICKET_ID,vehicleId, spot,now);
+				tickets.put(ticket.id, ticket);
+				result[0]=ticket;
+			}
+			return v;
+		});
+		return result[0];
 	}
 	
-	public Ticket park(VehicleType type, int vehicleId) {
-		if(freeSpots.get(type).isEmpty()) {
-			throw new RuntimeException("parking lot full!!!");
-		}
-		Spot spot = freeSpots.get(type).poll();
-		Ticket ticket = new Ticket(++TICKET_ID,new Vehicle(vehicleId,type),spot,(int)System.currentTimeMillis()/1000);
-		tickets.put(TICKET_ID, ticket);
-		return ticket;
-	}
-	
-	public boolean checkout(int ticketId) {
-		if(!tickets.containsKey(ticketId)) {
-			return false;
-		}
-		Ticket ticket = tickets.get(ticketId);
-		Spot spot = ticket.spot;
-		freeSpots.get(ticket.vehicle.type).add(spot);
-		tickets.remove(ticketId);
-		return true;
+	public int checkOut(int ticketId) {
+		int[] result = new int[] {-1};
+		tickets.compute(ticketId, (k,v)-> {
+			if(v==null||v.closed) {
+				throw new RuntimeException("Invalid ticket");
+			}
+			result[0] = v.estimateFare();
+			v.closed=true;
+			spots.get(v.spot.sizeCompatible).add(v.spot);
+			return v;
+		});
+		return result[0];
 	}
 }
 
@@ -101,26 +115,58 @@ import org.junit.jupiter.api.*;
 class DesignTest {
 	
 	
+	ParkingLotManager buildManager() {
+		ParkingLotManager manager = new ParkingLotManager();
+		manager.addSpot(2, VehicleSize.SMALL);
+		manager.addSpot(3, VehicleSize.SMALL);
+		manager.addSpot(1, VehicleSize.MEDIUM);
+		manager.addSpot(4, VehicleSize.MEDIUM);
+		manager.addSpot(5, VehicleSize.LARGE);
+		return manager;
+	}
+	
 	@Test
 	public void testDefault() throws Exception {
-		ParkingLot parkingLot = new ParkingLot();
-		parkingLot.addSpot(1, VehicleType.TWOWHEELER);
-		parkingLot.addSpot(2, VehicleType.TWOWHEELER);
-		parkingLot.addSpot(3, VehicleType.FOURWHEELER);
-		parkingLot.addSpot(4, VehicleType.FOURWHEELER);
-		parkingLot.addSpot(5, VehicleType.FOURWHEELER);
-		parkingLot.addSpot(6, VehicleType.FOURWHEELER);
-		parkingLot.addSpot(7, VehicleType.LARGE);
-		parkingLot.addSpot(8, VehicleType.LARGE);
-		Ticket ticket = parkingLot.park(VehicleType.TWOWHEELER, 1);
-		assertTrue(parkingLot.checkout(ticket.id));
-		parkingLot.park(VehicleType.TWOWHEELER, 2);
-		ticket = parkingLot.park(VehicleType.TWOWHEELER, 3);
-		assertThrows(RuntimeException.class, ()-> {
-			parkingLot.park(VehicleType.TWOWHEELER, 4);
-		});
-		parkingLot.checkout(ticket.id);
-		parkingLot.park(VehicleType.TWOWHEELER, 4);
+		ParkingLotManager manager = buildManager();
+		int t1 = manager.checkIn(VehicleSize.SMALL, 1).id;
+		int t2 = manager.checkIn(VehicleSize.SMALL, 2).id;
+		assertEquals(t1,1);
+		assertEquals(t2,2);
+		assertThrows(RuntimeException.class, ()->manager.checkIn(VehicleSize.SMALL, 3));
+		manager.checkOut(t2);
+		int t3 = manager.checkIn(VehicleSize.SMALL, 3).id;
+		assertEquals(t3,3);
+		assertThrows(RuntimeException.class, ()->manager.checkIn(VehicleSize.SMALL, 4));
+	}
+	
+	@Test
+	public void testBulkConcurrent() throws Exception {
+		ParkingLotManager manager = buildManager();
+		List<Thread> requests = new ArrayList<>();
+		for(int i=0;i<2;++i) {
+			int vehicleId=i+1;
+			requests.add(new Thread(()-> {
+				manager.checkIn(VehicleSize.SMALL, vehicleId);
+			}));
+		}
+		for(int i=0;i<2;++i) {
+			int vehicleId=i+3;
+			requests.add(new Thread(()-> {
+				manager.checkIn(VehicleSize.MEDIUM, vehicleId);
+			}));
+		}
+		requests.add(new Thread(()-> {
+			manager.checkIn(VehicleSize.LARGE, 5);
+		}));
+		for(Thread request: requests) {
+			request.start();
+		}
+		for(Thread request: requests) {
+			request.join();
+		}
+		assertThrows(RuntimeException.class, ()->manager.checkIn(VehicleSize.SMALL, 6));
+		assertThrows(RuntimeException.class, ()->manager.checkIn(VehicleSize.MEDIUM, 7));
+		assertThrows(RuntimeException.class, ()->manager.checkIn(VehicleSize.LARGE, 8));
 	}
 	
 }
