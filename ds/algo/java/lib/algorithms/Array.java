@@ -662,6 +662,35 @@ public class Array implements StandardAlgoSolver {
     }
   }
 
+  // Must start with the interval starting with 0. Jump through the interval with max end point. Keep jumping
+  // through the max ends until touching n. If jump not possible anywhere return -1 else return jump count.
+  // O(n)O(1).
+  public int minOverlappingIntervalsToCoverAllPoints(int[][] a) {
+    int n = ranges.length;
+    Arrays.sort(a, (x,y)->Integer.compare(x[0],y[0]));
+    int max = -1;
+    for(int i=0;i<n;++i)if(a[i][0]==0)max=Math.max(max, a[i][1]);
+    if(max==-1)return -1;
+    int nextmax = -1;
+    int count = 1;
+    for(int i=0;i<n;++i) {
+        int start = a[i][0];
+        int end = a[i][1];
+        if(max==n) return count;
+        if(start > max) {
+            if(start > nextmax) return -1;
+            max=nextmax;
+            nextmax=-1;
+            ++count;
+        }
+        nextmax = Math.max(nextmax, end);
+    }
+    if(max==n)return count;
+    max=nextmax;++count;
+    if(max!=n)return -1;
+    return count;
+  }
+
   @Override
   public void solve(FastInputReader in, PrintWriter out) {
     validateLogic(

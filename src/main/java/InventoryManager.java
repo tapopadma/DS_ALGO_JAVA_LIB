@@ -151,3 +151,236 @@ class DesignTest {
 	}
 
 }
+
+
+package design;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+
+interface Repository {
+	boolean add(int warehouseId, int productId, int quantity);
+	boolean remove(int warehouseId, int productId, int quantity);
+	boolean transfer(int fromWarehouseId, int toWarehouseId, int productId, int quantity);
+	void configureAlert(int warehouseId, int productId, AlertConfig config);
+	Stock getStock(int warehouseId, int productId);
+}
+
+class AlertConfig {
+	int threshold;
+	Runnable callback;
+	
+	public AlertConfig(int t, Runnable r) {
+		threshold=t;callback=r;
+	}
+	
+	void trigger() {
+		callback.run();
+	}
+}
+
+class Stock {
+	int productId;
+	int quantity;
+	Stock(int p, int q) {
+		productId=p;quantity=q;
+	}
+}
+
+class Warehouse {
+	int id;
+	final Map<Integer, Stock> stock;
+	final Map<Integer, AlertConfig> alerts;
+	
+	public Warehouse(int i) {
+		id=i;
+		stock = new ConcurrentHashMap<Integer, Stock>();
+		alerts = new ConcurrentHashMap<Integer, AlertConfig>();
+	}
+	void triggerAlert(int productId) {
+		if(alerts.containsKey(productId)) {
+			alerts.get(productId).trigger();
+		}
+	}
+	public boolean add(int productId, int quantity) {
+		stock.compute(productId, (k,v)-> {
+			if(v==null)v = new Stock(k,quantity);
+			else v.quantity += quantity;
+			return v;
+		});
+		return true;
+	}
+	public boolean remove(int productId, int quantity) {
+		var result = new Object() {boolean success=false;};
+		stock.compute(productId, (k,v)-> {
+			if(v!=null&&v.quantity>=quantity) {
+				result.success=true;
+				v.quantity-=quantity;
+				if(alerts.containsKey(productId) && alerts.get(productId).threshold>v.quantity) {
+					triggerAlert(productId);
+				}
+			}
+			return v;
+		});
+		return result.success;
+	}
+	public boolean transfer(Warehouse toWarehouse, int productId, int quantity) {
+		if(this.remove(productId, quantity)) {
+			toWarehouse.add(productId, quantity);
+			return true;
+		}
+		return false;
+	}
+	public void setAlert(int productId, AlertConfig config) {
+		alerts.put(productId, config);
+	}
+}
+
+class InmemoryRepository implements Repository {
+	
+	final Map<Integer, Warehouse> warehouses;
+	final Map<Integer, Lock> locks;
+	
+	public InmemoryRepository() {
+		warehouses = new ConcurrentHashMap<Integer, Warehouse>();
+		locks = new ConcurrentHashMap<Integer, Lock>();
+	}
+
+	@Override
+	public boolean add(int warehouseId, int productId, int quantity) {
+		var result = new Object() {boolean success=false;};
+		warehouses.compute(warehouseId, (k,v)-> {
+			if(v==null)v=new Warehouse(k);
+			result.success = v.add(productId, quantity);
+			return v;
+		});
+		return result.success;
+	}
+
+	@Override
+	public boolean remove(int warehouseId, int productId, int quantity) {
+		var result = new Object() {boolean success=false;};
+		warehouses.compute(warehouseId, (k,v)-> {
+			if(v==null)return v;
+			result.success = v.remove(productId, quantity);
+			return v;
+		});
+		return result.success;
+	}
+
+	@Override
+	public boolean transfer(int fromWarehouseId, int toWarehouseId, int productId, int quantity) {
+		List<Integer> list = new ArrayList<>();
+		list.add(fromWarehouseId);
+		list.add(toWarehouseId);
+		Collections.sort(list);
+		for(int k: list) {
+			locks.putIfAbsent(k, new ReentrantLock());
+			locks.get(k).lock();
+		}
+		boolean success = false;
+		try {
+			if(warehouses.containsKey(fromWarehouseId)&&warehouses.containsKey(toWarehouseId)) {
+				success = warehouses.get(fromWarehouseId).transfer(warehouses.get(toWarehouseId), productId, quantity);
+			}
+		} finally {
+			Collections.reverse(list);
+			for(int k: list) {
+				locks.get(k).unlock();
+			}
+		}
+		return success;
+	}
+
+	@Override
+	public void configureAlert(int warehouseId, int productId, AlertConfig config) {
+		warehouses.get(warehouseId).setAlert(productId, config);
+	}
+	
+	@Override
+	public Stock getStock(int warehouseId, int productId) {
+		return warehouses.get(warehouseId).stock.getOrDefault(productId, null);
+	}
+	
+}
+
+class WarehouseManagerService {
+	final Repository repository;
+	
+	public WarehouseManagerService(Repository repository) {
+		this.repository=repository;
+	}
+	
+	public boolean add(int warehouseId, int productId, int quantity) {
+		return repository.add(warehouseId, productId, quantity);
+	}
+	public boolean remove(int warehouseId, int productId, int quantity) {
+		return repository.remove(warehouseId, productId, quantity);
+	}
+	public boolean transfer(int fromWarehouseId, int toWarehouseId, int productId, int quantity) {
+		return repository.transfer(fromWarehouseId, toWarehouseId, productId, quantity);
+	}
+	public void configureAlert(int warehouseId, int productId, AlertConfig config) {
+		repository.configureAlert(warehouseId, productId, config);
+	}
+}
+package design;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import java.util.*;
+import org.junit.jupiter.api.*;
+
+class DesignTest {
+	
+
+	@Test
+	public void testBasic() throws Exception {
+		Repository repository = new InmemoryRepository();
+		WarehouseManagerService service = new WarehouseManagerService(repository);
+		
+		assertTrue(service.add(1, 1, 5));
+		assertTrue(service.add(2, 1, 1));
+		assertTrue(service.transfer(1, 2, 1, 1));
+		assertTrue(service.add(2, 2, 10));
+		service.configureAlert(2, 2, new AlertConfig(6, ()->System.out.print("outofstock alert!!!")));
+		assertTrue(service.transfer(2, 1, 2, 5));
+		
+		assertEquals(5, repository.getStock(1, 2).quantity);
+		assertEquals(5, repository.getStock(2, 2).quantity);
+	}
+	
+	@Test
+	public void testAsync() throws Exception {
+		Repository repository = new InmemoryRepository();
+		WarehouseManagerService service = new WarehouseManagerService(repository);
+		
+		assertTrue(service.add(1, 1, 5000));
+		assertTrue(service.add(2, 1, 5000));
+		List<Thread> requests = new ArrayList<Thread>();
+		for(int i=0;i<20;++i) {
+			requests.add(new Thread(()->service.transfer(1, 2, 1, 10)));
+		}
+		for(int i=0;i<20;++i) {
+			requests.add(new Thread(()->service.transfer(2, 1, 1, 10)));
+		}
+		for(Thread t: requests)t.start();
+		for(Thread t: requests)t.join();
+		assertEquals(5000, repository.getStock(1, 1).quantity);
+		assertEquals(5000, repository.getStock(2, 1).quantity);
+	}
+
+}
